@@ -1,9 +1,6 @@
-# unir-bbdd-lab-1
-Repositorio con el ejercicio y todos los recursos utilizados el diseño de una base de datos con todos los precios de las gasolineras
+# bbdda-jdbc
+Proyecto java utilizando JDBC para acceder a bases de datos relacionales
 
-## Bitácora
-### 1. Descarga de los datos
-Lo primero que he hecho ha sido descargar los datos del siguiente enlace:
-https://geoportalgasolineras.es/geoportal-instalaciones/DescargarFicheros
+Instalar maven en windows: https://maven.apache.org/install.html
 
-He descargado el fichero de precios de las gasolineras de España en formato CSV.
+Instalar maven en mac: https://formulae.brew.sh/formula/maven
