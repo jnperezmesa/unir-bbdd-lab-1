@@ -1,35 +1,44 @@
+-- create database if not exists
+CREATE DATABASE IF NOT EXISTS fuel_db
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_spanish_ci;
+
+-- use database
+USE fuel_db;
+
+
 -- company Table
-CREATE TABLE company (
+CREATE TABLE IF NOT EXISTS company (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(250)
 );
 
 -- community Table
-CREATE TABLE community (
+CREATE TABLE IF NOT EXISTS community (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(250)
 );
 
 -- province Table
-CREATE TABLE province (
+CREATE TABLE IF NOT EXISTS province (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(250)
 );
 
 -- city Table
-CREATE TABLE city (
+CREATE TABLE IF NOT EXISTS city (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(250)
 );
 
 -- postal_code Table
-CREATE TABLE postal_code (
+CREATE TABLE IF NOT EXISTS postal_code (
     id INT AUTO_INCREMENT PRIMARY KEY,
     code INT
 );
 
 -- fuel_station Table
-CREATE TABLE fuel_station (
+CREATE TABLE IF NOT EXISTS fuel_station (
     id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT,
     community_id INT,
@@ -50,13 +59,13 @@ CREATE TABLE fuel_station (
 );
 
 -- fuel_type Table
-CREATE TABLE fuel_type (
+CREATE TABLE IF NOT EXISTS fuel_type (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(250)
 );
 
 -- price Table
-CREATE TABLE price (
+CREATE TABLE IF NOT EXISTS price (
     id INT AUTO_INCREMENT PRIMARY KEY,
     fuel_type_id INT,
     fuel_station_id INT,
