@@ -546,6 +546,17 @@ public class LoadFuelStationDataApplication {
                 int cityId = getTownId(connection, nextLine[colTown]);
                 int postalCodeId = getPostalCodeId(connection, Integer.parseInt(nextLine[colPostalCode]));
 
+                float latitude = 0.0f;
+                float longitude = 0.0f;
+
+                if (!nextLine[colLatitude].trim().isEmpty()) {
+                    latitude = Float.parseFloat(nextLine[colLatitude].trim().toLowerCase());
+                }
+
+                if (!nextLine[colLongitude].trim().isEmpty()) {
+                    longitude = Float.parseFloat(nextLine[colLongitude].trim().toLowerCase());
+                }
+
                 FuelStation fuelStation = new FuelStation(
                         0,
                         companyId,
@@ -555,8 +566,8 @@ public class LoadFuelStationDataApplication {
                         postalCodeId,
                         nextLine[colAddress].trim().toLowerCase(),
                         nextLine[colMargin].trim().toLowerCase().charAt(0),
-                        Float.parseFloat(nextLine[colLatitude].trim().toLowerCase()),
-                        Float.parseFloat(nextLine[colLongitude].trim().toLowerCase()),
+                        latitude,
+                        longitude,
                         nextLine[colOpeningHours].trim().toLowerCase(),
                         false
                 );
