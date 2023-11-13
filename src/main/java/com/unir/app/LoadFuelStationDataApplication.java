@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
-import java.text.ParseException;
+//import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +29,10 @@ public class LoadFuelStationDataApplication {
             log.info("Conexión establecida con la base de datos Oracle");
 
             // Leemos los datos del fichero CSV
-            List<FuelStation> fuelStations = readData();
+            List<FuelType> fuelTypes = readFuelTypeData();
+
+            // Introducimos los datos en la base de datos
+            intakeFuelTypes(connection, fuelTypes);
 
         } catch (Exception e) {
             log.error("Error al tratar con la base de datos", e);
@@ -43,7 +46,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getCompanyId(Connection connection, String company) throws SQLException {
-        String query = "SELECT id FROM companies WHERE name = ?";
+        String query = "SELECT id FROM company WHERE name = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, company);
         ResultSet resultSet = statement.executeQuery();
@@ -62,7 +65,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getProvinceId(Connection connection, String province) throws SQLException {
-        String query = "SELECT id FROM provinces WHERE name = ?";
+        String query = "SELECT id FROM province WHERE name = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, province);
         ResultSet resultSet = statement.executeQuery();
@@ -80,7 +83,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getMunicipalityId(Connection connection, String municipality) throws SQLException {
-        String query = "SELECT id FROM municipalities WHERE name = ?";
+        String query = "SELECT id FROM municipality WHERE name = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, municipality);
         ResultSet resultSet = statement.executeQuery();
@@ -98,7 +101,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getTownId(Connection connection, String town) throws SQLException {
-        String query = "SELECT id FROM towns WHERE name = ?";
+        String query = "SELECT id FROM town WHERE name = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, town);
         ResultSet resultSet = statement.executeQuery();
@@ -117,7 +120,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getPostalCodeId(Connection connection, String postalCode) throws SQLException {
-        String query = "SELECT id FROM postal_codes WHERE name = ?";
+        String query = "SELECT id FROM postal_code WHERE name = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, postalCode);
         ResultSet resultSet = statement.executeQuery();
@@ -130,7 +133,7 @@ public class LoadFuelStationDataApplication {
 
     // Función que obtiene el id de la base de datos un tipo de combustible
     private static int getFuelTypeId(Connection connection, String fuelType) throws SQLException {
-        String query = "SELECT id FROM fuel_types WHERE name = ?";
+        String query = "SELECT id FROM fuel_type WHERE name = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, fuelType);
         ResultSet resultSet = statement.executeQuery();
@@ -142,45 +145,89 @@ public class LoadFuelStationDataApplication {
     }
 
     /**
-     * Lee los datos del fichero CSV y los devuelve en una lista de empleados.
-     * El fichero CSV debe estar en la raíz del proyecto.
-     *
-     * @return - Lista de empleados
+     * Read fuel types from CSV file
+     * @return - List of fuel types
      */
-    private static List<FuelType> readData() {
+    private static List<FuelType> readFuelTypeData() {
 
-        // Try-with-resources. Se cierra el reader automáticamente al salir del bloque try
-        // CSVReader nos permite leer el fichero CSV linea a linea
+        // Try-with-resources. The reader closes automatically when exiting the try block.
+        // CSVReader allows us to read the CSV file line by line.
         try (CSVReader reader = new CSVReader(new FileReader("csv/fuel_type.csv"))) {
 
-            // Creamos la lista de empleados y el formato de fecha
+            // Create list of fuel types
             List<FuelType> fuelTypes = new LinkedList<>();
-            SimpleDateFormat format = new SimpleDateFormat("yyy-MM-dd");
 
-            // Saltamos la primera linea, que contiene los nombres de las columnas del CSV
+            // Skip first line, which contains the names of the CSV columns
             reader.skip(1);
             String[] nextLine;
 
-            // Leemos el fichero linea a linea
+            // We read the file line by line
             while((nextLine = reader.readNext()) != null) {
 
                 // Creamos el empleado y lo añadimos a la lista
                 FuelType fuelType = new FuelType(
                         0,
-                        nextLine[1],
-                        nextLine[2],
-                        nextLine[3],
+                        nextLine[0]
                 );
                 fuelTypes.add(fuelType);
             }
             return fuelTypes;
         } catch (IOException e) {
-            log.error("Error al leer el fichero CSV", e);
+            log.error("Error reading CSV file", e);
             throw new RuntimeException(e);
-        } catch (CsvValidationException | ParseException e) {
+        } catch (CsvValidationException e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * Enter the fuel types in the database.
+     * If it does not exist, it is inserted.
+     * @param connection - Connection to the database.
+     * @param fuelTypes - List of fuel types.
+     */
+    private static void intakeFuelTypes(Connection connection, List<FuelType> fuelTypes) {
+
+        // Creamos la query
+        String query = "INSERT INTO fuel_type (name) VALUES (?)";
+        int lote = 2;
+        int contador = 0;
+
+        // Try-with-resources. The statement is automatically closed when you exit the try block.
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+
+            // Disable autocommit
+            connection.setAutoCommit(false);
+
+            // We go through the list of fuels
+            for (FuelType fuelType : fuelTypes) {
+
+                // If the fuel does not exist, we insert it
+                if (getFuelTypeId(connection, fuelType.getName()) == -1) {
+                    // We set the query parameters
+                    statement.setString(1, fuelType.getName());
+
+                    // We execute the query
+                    statement.addBatch();
+
+                    if (++contador % lote == 0) {
+                        statement.executeBatch();
+                    }
+                }
+            }
+
+            // We execute the batch if it has not been executed before
+            statement.executeBatch();
+
+            // Hacemos commit y volvemos a activar el autocommit
+            connection.commit();
+            connection.setAutoCommit(true);
+
+            log.info("Fuel types data entered into the database");
+        } catch (SQLException e) {
+            log.error("Error entering data into the database", e);
+            throw new RuntimeException(e);
+        }
+    }
 
 }
