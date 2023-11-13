@@ -19,9 +19,10 @@ import java.sql.*;
 //import java.text.ParseException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.List;
-import java.util.Arrays;
 
 @Slf4j
 public class LoadFuelStationDataApplication {
@@ -37,25 +38,25 @@ public class LoadFuelStationDataApplication {
             log.info("Conexión establecida con la base de datos Oracle");
 
             // Add fuel types to the database
-            List<FuelType> fuelTypes = readFuelTypeData(
+            Set<FuelType> fuelTypes = readFuelTypeData(
                     "fuel_type",
                     0
             );
             intakeFuelTypes(connection, fuelTypes);
             // Add provinces to the database
-            List<Province> provinces = readProvinceData(
+            Set<Province> provinces = readProvinceData(
                     "embarcacionesPrecios_es",
                     0
             );
             intakeProvinces(connection, provinces);
             // Add municipality to the database
-            List<Municipality> municipalities = readMunicipalityData(
+            Set<Municipality> municipalities = readMunicipalityData(
                     "embarcacionesPrecios_es",
                     1
             );
             intakeMunicipalities(connection, municipalities);
             // Add town to the database
-            List<Town> towns = readTownData(
+            Set<Town> towns = readTownData(
                     "embarcacionesPrecios_es",
                     2
             );
@@ -236,14 +237,13 @@ public class LoadFuelStationDataApplication {
      * Get date of export from the first line and second column of CSV file
      * @return - Date of export
      */
-    private static Date readDateData(String fileName, int column) {
+    private static Date readDateData(String fileName) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
 
             // Skip first line, which contains the names of the CSV columns
-            reader.skip(1);
             String[] nextLine;
 
             // We read the file line by line
@@ -251,7 +251,7 @@ public class LoadFuelStationDataApplication {
 
                 // Create date and return it
                 SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-                java.util.Date parsed = format.parse(nextLine[column]);
+                java.util.Date parsed = format.parse(nextLine[2]);
                 Date date = new Date(parsed.getTime());
                 return date;
             }
@@ -270,26 +270,25 @@ public class LoadFuelStationDataApplication {
      * Read fuel types from CSV file
      * @return - List of fuel types
      */
-    private static List<FuelType> readFuelTypeData(String fileName, int column) {
+    private static Set<FuelType> readFuelTypeData(String fileName, int column) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
 
             // Create list of fuel types
-            List<FuelType> fuelTypes = new LinkedList<>();
+            Set<FuelType> fuelTypes = new HashSet<>();
 
             // Skip first line, which contains the names of the CSV columns
-            reader.skip(1);
+            reader.skip(2);
             String[] nextLine;
 
             // We read the file line by line
             while((nextLine = reader.readNext()) != null) {
-
                 // Create fuel type and add it to the list
                 FuelType fuelType = new FuelType(
                         0,
-                        nextLine[column]
+                        nextLine[column].trim().toLowerCase()
                 );
                 fuelTypes.add(fuelType);
             }
@@ -307,17 +306,17 @@ public class LoadFuelStationDataApplication {
      * Read provinces from CSV file
      * @return - List of provinces
      */
-    private static List<Province> readProvinceData(String fileName, int column) {
+    private static Set<Province> readProvinceData(String fileName, int column) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
 
             // Create list of provinces
-            List<Province> provinces = new LinkedList<>();
+            Set<Province> provinces = new HashSet<>();
 
             // Skip first line, which contains the names of the CSV columns
-            reader.skip(1);
+            reader.skip(2);
             String[] nextLine;
 
             // We read the file line by line
@@ -326,7 +325,7 @@ public class LoadFuelStationDataApplication {
                 // Create province and add it to the list
                 Province province = new Province(
                         0,
-                        nextLine[column]
+                        nextLine[column].trim().toLowerCase()
                 );
                 provinces.add(province);
             }
@@ -343,17 +342,17 @@ public class LoadFuelStationDataApplication {
      * Read municipalities from CSV file
      * @return - List of municipalities
      */
-    private static List<Municipality> readMunicipalityData(String fileName, int column) {
+    private static Set<Municipality> readMunicipalityData(String fileName, int column) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
 
             // Create list of municipalities
-            List<Municipality> municipalities = new LinkedList<>();
+            Set<Municipality> municipalities = new HashSet<>();
 
             // Skip first line, which contains the names of the CSV columns
-            reader.skip(1);
+            reader.skip(2);
             String[] nextLine;
 
             // We read the file line by line
@@ -362,7 +361,7 @@ public class LoadFuelStationDataApplication {
                 // Create municipality and add it to the list
                 Municipality municipality = new Municipality(
                         0,
-                        nextLine[column]
+                        nextLine[column].trim().toLowerCase()
                 );
                 municipalities.add(municipality);
             }
@@ -379,17 +378,17 @@ public class LoadFuelStationDataApplication {
      * Read towns from CSV file
      * @return - List of towns
      */
-    private static List<Town> readTownData(String fileName, int column) {
+    private static Set<Town> readTownData(String fileName, int column) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
 
             // Create list of towns
-            List<Town> towns = new LinkedList<>();
+            Set<Town> towns = new HashSet<>();
 
             // Skip first line, which contains the names of the CSV columns
-            reader.skip(1);
+            reader.skip(2);
             String[] nextLine;
 
             // We read the file line by line
@@ -398,7 +397,7 @@ public class LoadFuelStationDataApplication {
                 // Create town and add it to the list
                 Town town = new Town(
                         0,
-                        nextLine[column]
+                        nextLine[column].trim().toLowerCase()
                 );
                 towns.add(town);
             }
@@ -415,17 +414,17 @@ public class LoadFuelStationDataApplication {
      * Read postal codes from CSV file
      * @return - List of postal codes
      */
-    private static List<PostalCode> readPostalCodeData(String fileName, int column) {
+    private static Set<PostalCode> readPostalCodeData(String fileName, int column) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
 
             // Create list of postal codes
-            List<PostalCode> postalCodes = new LinkedList<>();
+            Set<PostalCode> postalCodes = new HashSet<>();
 
             // Skip first line, which contains the names of the CSV columns
-            reader.skip(1);
+            reader.skip(2);
             String[] nextLine;
 
             // We read the file line by line
@@ -434,7 +433,7 @@ public class LoadFuelStationDataApplication {
                 // Create postal code and add it to the list
                 PostalCode postalCode = new PostalCode(
                         0,
-                        Integer.parseInt(nextLine[column])
+                        Integer.parseInt(nextLine[column].trim().toLowerCase())
                 );
                 postalCodes.add(postalCode);
             }
@@ -451,17 +450,17 @@ public class LoadFuelStationDataApplication {
      * Read companies from CSV file
      * @return - List of companies
      */
-    private static List<Company> readCompanyData(String fileName, int column) {
+    private static Set<Company> readCompanyData(String fileName, int column) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
 
             // Create list of companies
-            List<Company> companies = new LinkedList<>();
+            Set<Company> companies = new HashSet<>();
 
             // Skip first line, which contains the names of the CSV columns
-            reader.skip(1);
+            reader.skip(2);
             String[] nextLine;
 
             // We read the file line by line
@@ -470,7 +469,7 @@ public class LoadFuelStationDataApplication {
                 // Create company and add it to the list
                 Company company = new Company(
                         0,
-                        nextLine[column]
+                        nextLine[column].trim().toLowerCase()
                 );
                 companies.add(company);
             }
@@ -506,7 +505,7 @@ public class LoadFuelStationDataApplication {
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
 
             List<FuelStation> fuelStations = new LinkedList<>();
-            reader.skip(1);
+            reader.skip(2);
             String[] nextLine;
 
             while((nextLine = reader.readNext()) != null) {
@@ -523,11 +522,11 @@ public class LoadFuelStationDataApplication {
                         provinceId,
                         cityId,
                         postalCodeId,
-                        nextLine[colAddress],
-                        nextLine[colMargin].charAt(0),
-                        Float.parseFloat(nextLine[colLatitude]),
-                        Float.parseFloat(nextLine[colLongitude]),
-                        nextLine[colOpeningHours],
+                        nextLine[colAddress].trim().toLowerCase(),
+                        nextLine[colMargin].trim().toLowerCase().charAt(0),
+                        Float.parseFloat(nextLine[colLatitude].trim().toLowerCase()),
+                        Float.parseFloat(nextLine[colLongitude].trim().toLowerCase()),
+                        nextLine[colOpeningHours].trim().toLowerCase(),
                         IsMaritime
                 );
                 fuelStations.add(fuelStation);
@@ -555,7 +554,7 @@ public class LoadFuelStationDataApplication {
             try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
 
                 List<Price> prices = new LinkedList<>();
-                reader.skip(1);
+                reader.skip(2);
                 String[] nextLine;
 
                 while((nextLine = reader.readNext()) != null) {
@@ -563,19 +562,19 @@ public class LoadFuelStationDataApplication {
                     int fuelTypeId = getFuelTypeId(connection, fuelName);
                     Date createAt;
 
-                    if (!nextLine[colCreateDate].isEmpty()) {
+                    if (!nextLine[colCreateDate].trim().isEmpty()) {
                         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-                        java.util.Date parsed = format.parse(nextLine[colCreateDate]);
+                        java.util.Date parsed = format.parse(nextLine[colCreateDate].trim().toLowerCase());
                         createAt = new Date(parsed.getTime());
                     } else {
-                        createAt = readDateData(fileName, 2);
+                        createAt = readDateData(fileName);
                     }
 
                     Price price = new Price(
                             0,
                             fuelStationId,
                             fuelTypeId,
-                            Float.parseFloat(nextLine[colPrice]),
+                            Float.parseFloat(nextLine[colPrice].trim().toLowerCase()),
                             createAt
                     );
                     prices.add(price);
@@ -596,7 +595,7 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param fuelTypes - List of fuel types.
      */
-    private static void intakeFuelTypes(Connection connection, List<FuelType> fuelTypes) {
+    private static void intakeFuelTypes(Connection connection, Set<FuelType> fuelTypes) {
 
         // Create query
         String query = "INSERT INTO fuel_type (name) VALUES (?)";
@@ -646,7 +645,7 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param provinces - List of provinces.
      */
-    private static void intakeProvinces(Connection connection, List<Province> provinces) {
+    private static void intakeProvinces(Connection connection, Set<Province> provinces) {
 
         // Create query
         String query = "INSERT INTO province (name) VALUES (?)";
@@ -696,7 +695,7 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param municipalities - List of municipalities.
      */
-    private static void intakeMunicipalities(Connection connection, List<Municipality> municipalities) {
+    private static void intakeMunicipalities(Connection connection, Set<Municipality> municipalities) {
 
         // Create query
         String query = "INSERT INTO municipality (name) VALUES (?)";
@@ -746,7 +745,7 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param towns - List of towns.
      */
-    private static void intakeTowns(Connection connection, List<Town> towns) {
+    private static void intakeTowns(Connection connection, Set<Town> towns) {
 
         // Create query
         String query = "INSERT INTO town (name) VALUES (?)";
@@ -796,7 +795,7 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param postalCodes - List of postal codes.
      */
-    private static void intakePostalCodes(Connection connection, List<PostalCode> postalCodes) {
+    private static void intakePostalCodes(Connection connection, Set<PostalCode> postalCodes) {
 
         // Create query
         String query = "INSERT INTO postal_code (name) VALUES (?)";
@@ -846,7 +845,7 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param companies - List of companies.
      */
-    private static void intakeCompanies(Connection connection, List<Company> companies) {
+    private static void intakeCompanies(Connection connection, Set<Company> companies) {
 
         // Create query
         String query = "INSERT INTO company (name) VALUES (?)";
