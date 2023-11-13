@@ -13,20 +13,20 @@ CREATE TABLE IF NOT EXISTS company (
     name VARCHAR(250)
 );
 
--- community Table
-CREATE TABLE IF NOT EXISTS community (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(250)
-);
-
 -- province Table
 CREATE TABLE IF NOT EXISTS province (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(250)
 );
 
--- city Table
-CREATE TABLE IF NOT EXISTS city (
+-- municipality Table
+CREATE TABLE IF NOT EXISTS municipality (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(250)
+);
+
+-- town Table
+CREATE TABLE IF NOT EXISTS town (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(250)
 );
@@ -41,9 +41,9 @@ CREATE TABLE IF NOT EXISTS postal_code (
 CREATE TABLE IF NOT EXISTS fuel_station (
     id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT,
-    community_id INT,
     province_id INT,
-    city_id INT,
+    municipality_id INT,
+    town_id INT,
     postal_code_id INT,
     address TEXT,
     margin CHAR(1) NULL,
@@ -52,9 +52,9 @@ CREATE TABLE IF NOT EXISTS fuel_station (
     opening_hours TEXT,
     is_maritime BOOL DEFAULT FALSE,
     FOREIGN KEY (company_id) REFERENCES company(id),
-    FOREIGN KEY (community_id) REFERENCES community(id),
     FOREIGN KEY (province_id) REFERENCES province(id),
-    FOREIGN KEY (city_id) REFERENCES city(id),
+    FOREIGN KEY (municipality_id) REFERENCES municipality(id),
+    FOREIGN KEY (town_id) REFERENCES town(id),
     FOREIGN KEY (postal_code_id) REFERENCES postal_code(id)
 );
 
