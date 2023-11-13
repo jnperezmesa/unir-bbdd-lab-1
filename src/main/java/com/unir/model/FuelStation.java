@@ -8,9 +8,9 @@ import lombok.Getter;
 public class FuelStation {
     private int id;
     private int companyId;
-    private int communityId;
     private int provinceId;
-    private int cityId;
+    private int municipalityId;
+    private int townId;
     private int postalCodeId;
     private String address;
     private char margin;

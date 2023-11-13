@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
-//import java.text.ParseException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashSet;
@@ -62,20 +61,53 @@ public class LoadFuelStationDataApplication {
             );
             intakeTowns(connection, towns);
             // Add postal code to the database
-            //List<PostalCode> postalCodes = readPostalCodeData(
-            //        "embarcacionesPrecios_es",
-            //        3
-            //);
-            //intakePostalCodes(connection, postalCodes);
+            Set<PostalCode> postalCodes = readPostalCodeData(
+                    "embarcacionesPrecios_es",
+                    3
+            );
+            intakePostalCodes(connection, postalCodes);
             // Add company to the database
-            //List<Company> companies = readCompanyData(
-            //        "embarcacionesPrecios_es",
-            //        12
-            //);
-            //intakeCompanies(connection, companies);
+            Set<Company> companies = readCompanyData(
+                    "embarcacionesPrecios_es",
+                    12
+            );
+            intakeCompanies(connection, companies);
             // Add fuel station to the database
-            //List<FuelStation> fuelStations = readFuelStationData();
-            //intakeFuelStations(connection, fuelStations);
+            List<FuelStation> fuelStations = readMaritimFuelStationData(
+                    connection,
+                    "embarcacionesPrecios_es",
+                    12,
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    6,
+                    5,
+                    13
+            );
+            intakeFuelStations(connection, fuelStations);
+            // Add prices to the database
+            List<Price> prices = readPriceData(
+                    connection,
+                    "embarcacionesPrecios_es",
+                    "gasolina 95 e5",
+                    6,
+                    5,
+                    7,
+                    -1
+            );
+            intakePrices(connection, prices);
+            prices = readPriceData(
+                    connection,
+                    "embarcacionesPrecios_es",
+                    "gasolina 95 e10",
+                    6,
+                    5,
+                    8,
+                    -1
+            );
+            intakePrices(connection, prices);
 
         } catch (Exception e) {
             log.error("Error al tratar con la base de datos", e);
@@ -163,7 +195,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getPostalCodeId(Connection connection, int postalCode) throws SQLException {
-        String query = "SELECT id FROM postal_code WHERE name = ?";
+        String query = "SELECT id FROM postal_code WHERE code = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setInt(1, postalCode);
         ResultSet resultSet = statement.executeQuery();
@@ -490,16 +522,15 @@ public class LoadFuelStationDataApplication {
             Connection connection,
             String fileName,
             int colCompany,
-            int colCommunity,
             int colProvince,
-            int colCity,
+            int colMunicipality,
+            int colTown,
             int colPostalCode,
             int colAddress,
             int colMargin,
             int colLatitude,
             int colLongitude,
-            int colOpeningHours,
-            boolean IsMaritime
+            int colOpeningHours
     ) {
 
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
@@ -510,9 +541,9 @@ public class LoadFuelStationDataApplication {
 
             while((nextLine = reader.readNext()) != null) {
                 int companyId = getCompanyId(connection, nextLine[colCompany]);
-                int communityId = getMunicipalityId(connection, nextLine[colCommunity]);
+                int communityId = getMunicipalityId(connection, nextLine[colMunicipality]);
                 int provinceId = getProvinceId(connection, nextLine[colProvince]);
-                int cityId = getTownId(connection, nextLine[colCity]);
+                int cityId = getTownId(connection, nextLine[colTown]);
                 int postalCodeId = getPostalCodeId(connection, Integer.parseInt(nextLine[colPostalCode]));
 
                 FuelStation fuelStation = new FuelStation(
@@ -527,7 +558,72 @@ public class LoadFuelStationDataApplication {
                         Float.parseFloat(nextLine[colLatitude].trim().toLowerCase()),
                         Float.parseFloat(nextLine[colLongitude].trim().toLowerCase()),
                         nextLine[colOpeningHours].trim().toLowerCase(),
-                        IsMaritime
+                        false
+                );
+                fuelStations.add(fuelStation);
+            }
+            return fuelStations;
+        } catch (IOException | CsvValidationException | SQLException e) {
+            log.error("Error reading CSV file", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Read fuel stations from CSV file
+     * @return - List of fuel stations
+     */
+    private static List<FuelStation> readMaritimFuelStationData(
+            Connection connection,
+            String fileName,
+            int colCompany,
+            int colProvince,
+            int colMunicipality,
+            int colTown,
+            int colPostalCode,
+            int colAddress,
+            int colLatitude,
+            int colLongitude,
+            int colOpeningHours
+    ) {
+
+        try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
+
+            List<FuelStation> fuelStations = new LinkedList<>();
+            reader.skip(2);
+            String[] nextLine;
+
+            while((nextLine = reader.readNext()) != null) {
+                int companyId = getCompanyId(connection, nextLine[colCompany]);
+                int municipalityId = getMunicipalityId(connection, nextLine[colMunicipality]);
+                int provinceId = getProvinceId(connection, nextLine[colProvince]);
+                int townId = getTownId(connection, nextLine[colTown]);
+                int postalCodeId = getPostalCodeId(connection, Integer.parseInt(nextLine[colPostalCode]));
+
+                float latitude = 0.0f;
+                float longitude = 0.0f;
+
+                if (!nextLine[colLatitude].trim().isEmpty()) {
+                    latitude = Float.parseFloat(nextLine[colLatitude].trim().toLowerCase());
+                }
+
+                if (!nextLine[colLongitude].trim().isEmpty()) {
+                    longitude = Float.parseFloat(nextLine[colLongitude].trim().toLowerCase());
+                }
+
+                FuelStation fuelStation = new FuelStation(
+                        0,
+                        companyId,
+                        provinceId,
+                        municipalityId,
+                        townId,
+                        postalCodeId,
+                        nextLine[colAddress].trim().toLowerCase(),
+                        'n',
+                        latitude,
+                        longitude,
+                        nextLine[colOpeningHours].trim().toLowerCase(),
+                        true
                 );
                 fuelStations.add(fuelStation);
             }
@@ -562,7 +658,7 @@ public class LoadFuelStationDataApplication {
                     int fuelTypeId = getFuelTypeId(connection, fuelName);
                     Date createAt;
 
-                    if (!nextLine[colCreateDate].trim().isEmpty()) {
+                    if (colCreateDate != -1 && !nextLine[colCreateDate].trim().isEmpty()) {
                         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
                         java.util.Date parsed = format.parse(nextLine[colCreateDate].trim().toLowerCase());
                         createAt = new Date(parsed.getTime());
@@ -798,7 +894,7 @@ public class LoadFuelStationDataApplication {
     private static void intakePostalCodes(Connection connection, Set<PostalCode> postalCodes) {
 
         // Create query
-        String query = "INSERT INTO postal_code (name) VALUES (?)";
+        String query = "INSERT INTO postal_code (code) VALUES (?)";
         int lote = 100;
         int contador = 0;
 
@@ -898,7 +994,7 @@ public class LoadFuelStationDataApplication {
     private static void intakeFuelStations(Connection connection, List<FuelStation> fuelStations) {
 
         // Creamos la query
-        String query = "INSERT INTO fuel_station (company_id, community_id, province_id, city_id, postal_code_id, address, margin, latitude, longitude, opening_hours, is_maritime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO fuel_station (company_id, province_id, municipality_id, town_id, postal_code_id, address, margin, latitude, longitude, opening_hours, is_maritime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int lote = 100;
         int contador = 0;
 
@@ -915,9 +1011,9 @@ public class LoadFuelStationDataApplication {
                 if (getFuelStationId(connection, fuelStation.getLatitude(), fuelStation.getLongitude()) == -1) {
                     // We set the query parameters
                     statement.setInt(1, fuelStation.getCompanyId());
-                    statement.setInt(2, fuelStation.getCommunityId());
-                    statement.setInt(3, fuelStation.getProvinceId());
-                    statement.setInt(4, fuelStation.getCityId());
+                    statement.setInt(2, fuelStation.getProvinceId());
+                    statement.setInt(3, fuelStation.getMunicipalityId());
+                    statement.setInt(4, fuelStation.getTownId());
                     statement.setInt(5, fuelStation.getPostalCodeId());
                     statement.setString(6, fuelStation.getAddress());
                     statement.setString(7, String.valueOf(fuelStation.getMargin()));
