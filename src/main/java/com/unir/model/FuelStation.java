@@ -18,5 +18,9 @@ public class FuelStation {
     private float longitude;
     private String openingHours;
     private boolean isMaritime;
+
+    public boolean getIsMaritime() {
+        return isMaritime;
+    }
 }
 
