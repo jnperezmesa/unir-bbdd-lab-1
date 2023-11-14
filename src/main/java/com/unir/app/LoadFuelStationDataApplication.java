@@ -50,7 +50,7 @@ public class LoadFuelStationDataApplication {
             // Add fuel data from terrestrial stations to the database
             addTerrestrialFuelData(connection);
             // Add fuel data from maritime stations to the database
-            addMaritimeFuelData(connection);
+            //addMaritimeFuelData(connection);
 
         } catch (Exception e) {
             log.error("Error al tratar con la base de datos", e);
@@ -233,7 +233,7 @@ public class LoadFuelStationDataApplication {
         int colMargin = 5;
         int colLatitude = 7;
         int colLongitude = 6;
-        int colOpeningHours = 28;
+        int colOpeningHours = 27;
         int colDate = 8;
         // Add provinces to the database
         Set<Province> provinces = readProvinceData(
@@ -300,10 +300,10 @@ public class LoadFuelStationDataApplication {
                 colTown,
                 colPostalCode,
                 colAddress,
-                colMargin,
                 colLatitude,
                 colLongitude,
                 colOpeningHours,
+                colMargin,
                 type
         );
         intakeFuelStations(
@@ -541,7 +541,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getCompanyId(Connection connection, String company) throws SQLException, IOException {
-        String query = "SELECT id FROM company WHERE name = ?";
+        String query = "SELECT id FROM company WHERE name = ? LIMIT 1";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, company);
         ResultSet resultSet = statement.executeQuery();
@@ -560,7 +560,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getProvinceId(Connection connection, String province) throws SQLException {
-        String query = "SELECT id FROM province WHERE name = ?";
+        String query = "SELECT id FROM province WHERE name = ? LIMIT 1";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, province);
         ResultSet resultSet = statement.executeQuery();
@@ -578,7 +578,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getMunicipalityId(Connection connection, String municipality) throws SQLException {
-        String query = "SELECT id FROM municipality WHERE name = ?";
+        String query = "SELECT id FROM municipality WHERE name = ? LIMIT 1";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, municipality);
         ResultSet resultSet = statement.executeQuery();
@@ -596,7 +596,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getTownId(Connection connection, String town) throws SQLException {
-        String query = "SELECT id FROM town WHERE name = ?";
+        String query = "SELECT id FROM town WHERE name = ? LIMIT 1";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, town);
         ResultSet resultSet = statement.executeQuery();
@@ -615,7 +615,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getPostalCodeId(Connection connection, int postalCode) throws SQLException {
-        String query = "SELECT id FROM postal_code WHERE code = ?";
+        String query = "SELECT id FROM postal_code WHERE code = ? LIMIT 1";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setInt(1, postalCode);
         ResultSet resultSet = statement.executeQuery();
@@ -652,7 +652,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getFuelStationId(Connection connection, float latitude, float longitude) throws SQLException {
-        String query = "SELECT id FROM fuel_station WHERE latitude = ? AND longitude = ?";
+        String query = "SELECT id FROM fuel_station WHERE latitude = ? AND longitude = ? LIMIT 1";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setFloat(1, latitude);
         statement.setFloat(2, longitude);
@@ -672,7 +672,7 @@ public class LoadFuelStationDataApplication {
      * @param createAt - Date of the price
      */
     private static int getPriceId(Connection connection, int fuelStationId, int fuelTypeId, Date createAt) throws SQLException {
-        String query = "SELECT id FROM price WHERE fuel_station_id = ? AND fuel_type_id = ? AND create_at = ?";
+        String query = "SELECT id FROM price WHERE fuel_station_id = ? AND fuel_type_id = ? AND create_at = ? LIMIT 1";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setInt(1, fuelStationId);
         statement.setInt(2, fuelTypeId);
@@ -971,58 +971,77 @@ public class LoadFuelStationDataApplication {
             int colTown,
             int colPostalCode,
             int colAddress,
-            int colMargin,
             int colLatitude,
             int colLongitude,
             int colOpeningHours,
+            int colMargin,
             String type
     ) {
 
-        try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
+            try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
 
-            List<FuelStation> fuelStations = new LinkedList<>();
-            reader.skip(2);
-            String[] nextLine;
+                List<FuelStation> fuelStations = new LinkedList<>();
+                reader.skip(2);
+                String[] nextLine;
 
-            while((nextLine = reader.readNext()) != null) {
-                int companyId = getCompanyId(connection, nextLine[colCompany]);
-                int communityId = getMunicipalityId(connection, nextLine[colMunicipality]);
-                int provinceId = getProvinceId(connection, nextLine[colProvince]);
-                int cityId = getTownId(connection, nextLine[colTown]);
-                int postalCodeId = getPostalCodeId(connection, Integer.parseInt(nextLine[colPostalCode]));
+                while((nextLine = reader.readNext()) != null) {
+                    int companyId = getCompanyId(connection, nextLine[colCompany]);
+                    if (companyId == -1) {
+                        continue;
+                    }
+                    int municipalityId = getMunicipalityId(connection, nextLine[colMunicipality]);
+                    if (municipalityId == -1) {
+                        continue;
+                    }
+                    int provinceId = getProvinceId(connection, nextLine[colProvince]);
+                    if (provinceId == -1) {
+                        continue;
+                    }
+                    int townId = getTownId(connection, nextLine[colTown]);
+                    if (townId == -1) {
+                        continue;
+                    }
+                    int postalCodeId = getPostalCodeId(connection, Integer.parseInt(nextLine[colPostalCode]));
+                    if (postalCodeId == -1) {
+                        continue;
+                    }
 
-                float latitude = 0.0f;
-                float longitude = 0.0f;
+                    float latitude = 0.0f;
+                    float longitude = 0.0f;
 
-                if (!nextLine[colLatitude].trim().isEmpty()) {
-                    latitude = Float.parseFloat(nextLine[colLatitude].trim().toLowerCase());
+                    if (!nextLine[colLatitude].trim().isEmpty()) {
+                        latitude = Float.parseFloat(nextLine[colLatitude].trim().toLowerCase());
+                    }
+
+                    if (!nextLine[colLongitude].trim().isEmpty()) {
+                        longitude = Float.parseFloat(nextLine[colLongitude].trim().toLowerCase());
+                    }
+
+                    if (latitude == 0.0f && longitude == 0.0f) {
+                        continue;
+                    }
+
+                    FuelStation fuelStation = new FuelStation(
+                            0,
+                            companyId,
+                            provinceId,
+                            municipalityId,
+                            townId,
+                            postalCodeId,
+                            nextLine[colAddress].trim().toLowerCase(),
+                            nextLine[colMargin].trim().toLowerCase().charAt(0),
+                            latitude,
+                            longitude,
+                            nextLine[colOpeningHours].trim().toLowerCase(),
+                            false
+                    );
+                    fuelStations.add(fuelStation);
                 }
-
-                if (!nextLine[colLongitude].trim().isEmpty()) {
-                    longitude = Float.parseFloat(nextLine[colLongitude].trim().toLowerCase());
-                }
-
-                FuelStation fuelStation = new FuelStation(
-                        0,
-                        companyId,
-                        communityId,
-                        provinceId,
-                        cityId,
-                        postalCodeId,
-                        nextLine[colAddress].trim().toLowerCase(),
-                        nextLine[colMargin].trim().toLowerCase().charAt(0),
-                        latitude,
-                        longitude,
-                        nextLine[colOpeningHours].trim().toLowerCase(),
-                        false
-                );
-                fuelStations.add(fuelStation);
+                return fuelStations;
+            } catch (IOException | CsvValidationException | SQLException e) {
+                log.error("Error reading CSV file" + type, e);
+                throw new RuntimeException(e);
             }
-            return fuelStations;
-        } catch (IOException | CsvValidationException | SQLException e) {
-            log.error("Error reading CSV file" + type, e);
-            throw new RuntimeException(e);
-        }
     }
 
     /**
@@ -1541,7 +1560,6 @@ public class LoadFuelStationDataApplication {
             // Commit and re-enable autocommit
             connection.commit();
             connection.setAutoCommit(true);
-
             log.info("Fuel stations data entered into the database" + type);
         } catch (SQLException e) {
             log.error("Error entering data into the database" + type, e);
