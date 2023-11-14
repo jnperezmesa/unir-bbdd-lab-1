@@ -48,7 +48,7 @@ public class LoadFuelStationDataApplication {
             );
 
             // Add fuel data from terrestrial stations to the database
-            //addTerrestrialFuelData(connection);
+            addTerrestrialFuelData(connection);
             // Add fuel data from maritime stations to the database
             addMaritimeFuelData(connection);
 
@@ -63,9 +63,10 @@ public class LoadFuelStationDataApplication {
     private static void addMaritimeFuelData(Connection connection) {
         // Name of origin of the data
         String type = " from maritime stations csv file";
+        String fileName = "maritimoPrecios_es";
         // Add provinces to the database
         Set<Province> provinces = readProvinceData(
-                "embarcacionesPrecios_es",
+                fileName,
                 0,
                 type
         );
@@ -76,7 +77,7 @@ public class LoadFuelStationDataApplication {
         );
         // Add municipality to the database
         Set<Municipality> municipalities = readMunicipalityData(
-                "embarcacionesPrecios_es",
+                fileName,
                 1,
                 type
         );
@@ -87,7 +88,7 @@ public class LoadFuelStationDataApplication {
         );
         // Add town to the database
         Set<Town> towns = readTownData(
-                "embarcacionesPrecios_es",
+                fileName,
                 2,
                 type
         );
@@ -98,7 +99,7 @@ public class LoadFuelStationDataApplication {
         );
         // Add postal code to the database
         Set<PostalCode> postalCodes = readPostalCodeData(
-                "embarcacionesPrecios_es",
+                fileName,
                 3,
                 type
         );
@@ -109,7 +110,7 @@ public class LoadFuelStationDataApplication {
         );
         // Add company to the database
         Set<Company> companies = readCompanyData(
-                "embarcacionesPrecios_es",
+                fileName,
                 12,
                 type
         );
@@ -121,7 +122,7 @@ public class LoadFuelStationDataApplication {
         // Add fuel station to the database
         List<FuelStation> fuelStations = readMaritimFuelStationData(
                 connection,
-                "embarcacionesPrecios_es",
+                fileName,
                 12,
                 0,
                 1,
@@ -141,7 +142,7 @@ public class LoadFuelStationDataApplication {
         // Add prices to the database
         List<Price> pricesGasolina95E5 = readPriceData(
                 connection,
-                "embarcacionesPrecios_es",
+                fileName,
                 "gasolina 95 E5",
                 6,
                 5,
@@ -156,7 +157,7 @@ public class LoadFuelStationDataApplication {
         );
         List<Price> pricesGasolina95E10 = readPriceData(
                 connection,
-                "embarcacionesPrecios_es",
+                fileName,
                 "gasolina 95 E10",
                 6,
                 5,
@@ -167,12 +168,12 @@ public class LoadFuelStationDataApplication {
         intakePrices(
                 connection,
                 pricesGasolina95E10,
-                "'gasolina 95 E10'" + type
+                "gasolina 95 E10" + type
         );
-        List<Price> pricesGasoleoA = readPriceData(
+        List<Price> pricesgasoleoA = readPriceData(
                 connection,
-                "embarcacionesPrecios_es",
-                "gasoleo a",
+                fileName,
+                "gasóleo a",
                 6,
                 5,
                 9,
@@ -181,13 +182,13 @@ public class LoadFuelStationDataApplication {
         );
         intakePrices(
                 connection,
-                pricesGasoleoA,
-                "gasoleo a" + type
+                pricesgasoleoA,
+                "gasóleo a" + type
         );
-        List<Price> pricesGasoleoB = readPriceData(
+        List<Price> pricesgasoleoB = readPriceData(
                 connection,
-                "embarcacionesPrecios_es",
-                "gasoleo b",
+                fileName,
+                "gasóleo b",
                 6,
                 5,
                 10,
@@ -196,13 +197,13 @@ public class LoadFuelStationDataApplication {
         );
         intakePrices(
                 connection,
-                pricesGasoleoB,
-                "gasoleo b" + type
+                pricesgasoleoB,
+                "gasóleo b" + type
         );
-        List<Price> pricesGasoleoMaritimo = readPriceData(
+        List<Price> pricesgasoleoMaritimo = readPriceData(
                 connection,
-                "embarcacionesPrecios_es",
-                "gasoleo maritimo",
+                fileName,
+                "gasóleo maritimo",
                 6,
                 5,
                 11,
@@ -211,8 +212,325 @@ public class LoadFuelStationDataApplication {
         );
         intakePrices(
                 connection,
-                pricesGasoleoMaritimo,
-                "gasoleo maritimo" + type
+                pricesgasoleoMaritimo,
+                "gasóleo maritimo" + type
+        );
+    }
+
+    /**
+     * Function to add fuel data from terrestrial stations to the database
+     */
+    private static void addTerrestrialFuelData(Connection connection) {
+        // Name of origin of the data
+        String type = " from terrestrial stations csv file";
+        String fileName = "terrestrePrecios_es";
+        int colCompany = 26;
+        int colProvince = 0;
+        int colMunicipality = 1;
+        int colTown = 2;
+        int colPostalCode = 3;
+        int colAddress = 4;
+        int colMargin = 5;
+        int colLatitude = 7;
+        int colLongitude = 6;
+        int colOpeningHours = 28;
+        int colDate = 8;
+        // Add provinces to the database
+        Set<Province> provinces = readProvinceData(
+                fileName,
+                colProvince,
+                type
+        );
+        intakeProvinces(
+                connection,
+                provinces,
+                type
+        );
+        // Add municipality to the database
+        Set<Municipality> municipalities = readMunicipalityData(
+                fileName,
+                colMunicipality,
+                type
+        );
+        intakeMunicipalities(
+                connection,
+                municipalities,
+                type
+        );
+        // Add town to the database
+        Set<Town> towns = readTownData(
+                fileName,
+                colTown,
+                type
+        );
+        intakeTowns(
+                connection,
+                towns,
+                type
+        );
+        // Add postal code to the database
+        Set<PostalCode> postalCodes = readPostalCodeData(
+                fileName,
+                colPostalCode,
+                type
+        );
+        intakePostalCodes(
+                connection,
+                postalCodes,
+                type
+        );
+        // Add company to the database
+        Set<Company> companies = readCompanyData(
+                fileName,
+                colCompany,
+                type
+        );
+        intakeCompanies(
+                connection,
+                companies,
+                type
+        );
+        // Add fuel station to the database
+        List<FuelStation> fuelStations = readFuelStationData(
+                connection,
+                fileName,
+                colCompany,
+                colProvince,
+                colMunicipality,
+                colTown,
+                colPostalCode,
+                colAddress,
+                colMargin,
+                colLatitude,
+                colLongitude,
+                colOpeningHours,
+                type
+        );
+        intakeFuelStations(
+                connection,
+                fuelStations,
+                type
+        );
+        // Add prices to the database
+        List<Price> pricesGasolina95E5 = readPriceData(
+                connection,
+                fileName,
+                "gasolina 95 E5",
+                colLatitude,
+                colLongitude,
+                9,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasolina95E5,
+                "'gasolina 95 E5'" + type
+        );
+        List<Price> pricesGasolina95E10 = readPriceData(
+                connection,
+                fileName,
+                "gasolina 95 E10",
+                colLatitude,
+                colLongitude,
+                10,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasolina95E10,
+                "'gasolina 95 E10'" + type
+        );
+        List<Price> pricesGasolina95E5Premium = readPriceData(
+                connection,
+                fileName,
+                "gasolina 95 E5 premium",
+                colLatitude,
+                colLongitude,
+                11,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasolina95E5Premium,
+                "'gasolina 95 E5 premium'" + type
+        );
+        List<Price> pricesGasolina98E5 = readPriceData(
+                connection,
+                fileName,
+                "gasolina 98 E5",
+                colLatitude,
+                colLongitude,
+                12,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasolina98E5,
+                "'gasolina 98 E5'" + type
+        );
+        List<Price> pricesGasolina98E10 = readPriceData(
+                connection,
+                fileName,
+                "gasolina 98 E10",
+                colLatitude,
+                colLongitude,
+                13,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasolina98E10,
+                "'gasolina 98 E10'" + type
+        );
+        List<Price> pricesgasoleoA = readPriceData(
+                connection,
+                fileName,
+                "gasóleo a",
+                colLatitude,
+                colLongitude,
+                14,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesgasoleoA,
+                "gasóleo a" + type
+        );
+        List<Price> pricesgasoleoPremium = readPriceData(
+                connection,
+                fileName,
+                "gasóleo premium",
+                colLatitude,
+                colLongitude,
+                15,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesgasoleoPremium,
+                "gasóleo premium" + type
+        );
+        List<Price> pricesgasoleoB = readPriceData(
+                connection,
+                fileName,
+                "gasóleo b",
+                colLatitude,
+                colLongitude,
+                16,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesgasoleoB,
+                "gasóleo b" + type
+        );
+        List<Price> pricesgasoleoC = readPriceData(
+                connection,
+                fileName,
+                "gasóleo c",
+                colLatitude,
+                colLongitude,
+                17,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesgasoleoC,
+                "gasóleo c" + type
+        );
+        List<Price> pricesBioetanol = readPriceData(
+                connection,
+                fileName,
+                "bioetanol",
+                colLatitude,
+                colLongitude,
+                18,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesBioetanol,
+                "bioetanol" + type
+        );
+        List<Price> pricesBiodiesel = readPriceData(
+                connection,
+                fileName,
+                "biodiésel",
+                colLatitude,
+                colLongitude,
+                20,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesBiodiesel,
+                "biodiésel" + type
+        );
+        List<Price> pricesGasesLicuadosDelPetroleo = readPriceData(
+                connection,
+                fileName,
+                "gases licuados del petróleo",
+                colLatitude,
+                colLongitude,
+                22,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasesLicuadosDelPetroleo,
+                "gases licuados del petróleo" + type
+        );
+        List<Price> pricesGasNaturalComprimido = readPriceData(
+                connection,
+                fileName,
+                "gas natural comprimido",
+                colLatitude,
+                colLongitude,
+                23,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasNaturalComprimido,
+                "gas natural comprimido" + type
+        );
+        List<Price> pricesGasNaturalLicuado = readPriceData(
+                connection,
+                fileName,
+                "gas natural licuado",
+                colLatitude,
+                colLongitude,
+                24,
+                colDate,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasNaturalLicuado,
+                "gas natural licuado" + type
+        );
+        List<Price> pricesHidrogeno = readPriceData(
+                connection,
+                fileName,
+                "hidrógeno",
+                colLatitude,
+                colLongitude,
+                25,
+                colDate,
+                type
         );
     }
 
