@@ -214,7 +214,7 @@ public class LoadFuelStationDataApplication {
      * @throws SQLException
      */
     private static int getFuelTypeId(Connection connection, String fuelType) throws SQLException {
-        String query = "SELECT id FROM fuel_type WHERE name = ?";
+        String query = "SELECT id FROM fuel_type WHERE name = ? LIMIT 1";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setString(1, fuelType);
         ResultSet resultSet = statement.executeQuery();
@@ -252,7 +252,7 @@ public class LoadFuelStationDataApplication {
      * @param fuelTypeId - Id of the fuel type
      * @param createAt - Date of the price
      */
-    private static boolean getPriceId(Connection connection, int fuelStationId, int fuelTypeId, Date createAt) throws SQLException {
+    private static int getPriceId(Connection connection, int fuelStationId, int fuelTypeId, Date createAt) throws SQLException {
         String query = "SELECT id FROM price WHERE fuel_station_id = ? AND fuel_type_id = ? AND create_at = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setInt(1, fuelStationId);
@@ -260,9 +260,9 @@ public class LoadFuelStationDataApplication {
         statement.setDate(3, createAt);
         ResultSet resultSet = statement.executeQuery();
         if (resultSet.next()) {
-            return false;
+            return resultSet.getInt("id");
         } else {
-            return true;
+            return -1;
         }
     }
 
@@ -687,7 +687,7 @@ public class LoadFuelStationDataApplication {
                     if (!(fuelStationId == -1) && !(priceValue == 0.0f) && !(fuelTypeId == -1)) {
                         Date createAt;
 
-                        if (colCreateDate != -1 && !nextLine[colCreateDate].trim().isEmpty()) {
+                        if (!(colCreateDate == -1) && !nextLine[colCreateDate].trim().isEmpty()) {
                             SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
                             java.util.Date parsed = format.parse(nextLine[colCreateDate].trim().toLowerCase());
                             createAt = new Date(parsed.getTime());
@@ -697,8 +697,8 @@ public class LoadFuelStationDataApplication {
 
                         Price price = new Price(
                                 0,
-                                fuelStationId,
                                 fuelTypeId,
+                                fuelStationId,
                                 priceValue,
                                 createAt
                         );
@@ -1098,7 +1098,7 @@ public class LoadFuelStationDataApplication {
             for (Price price : prices) {
 
                 // If the price does not exist, we insert it
-                if (getPriceId(connection, price.getFuelStationId(), price.getFuelTypeId(), price.getCreateAt())) {
+                if (getPriceId(connection, price.getFuelStationId(), price.getFuelTypeId(), price.getCreateAt()) == -1) {
                     // We set the query parameters
                     statement.setInt(1, price.getFuelStationId());
                     statement.setInt(2, price.getFuelTypeId());
