@@ -16,12 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.*;
+import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 public class LoadFuelStationDataApplication {
@@ -52,7 +50,7 @@ public class LoadFuelStationDataApplication {
     private static void addMaritimeFuelData(Connection connection) {
 
         // Add fuel types to the database
-        Set<FuelType> fuelTypes = readFuelTypeData(
+        List<FuelType> fuelTypes = readFuelTypeData(
                 "fuel_type",
                 0
         );
@@ -303,17 +301,17 @@ public class LoadFuelStationDataApplication {
      * Read fuel types from CSV file
      * @return - List of fuel types
      */
-    private static Set<FuelType> readFuelTypeData(String fileName, int column) {
+    private static List<FuelType> readFuelTypeData(String fileName, int column) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
 
             // Create list of fuel types
-            Set<FuelType> fuelTypes = new HashSet<>();
+            List<FuelType> fuelTypes = new LinkedList<>();
 
             // Skip first line, which contains the names of the CSV columns
-            reader.skip(2);
+            reader.skip(1);
             String[] nextLine;
 
             // We read the file line by line
@@ -721,7 +719,7 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param fuelTypes - List of fuel types.
      */
-    private static void intakeFuelTypes(Connection connection, Set<FuelType> fuelTypes) {
+    private static void intakeFuelTypes(Connection connection, List<FuelType> fuelTypes) {
 
         // Create query
         String query = "INSERT INTO fuel_type (name) VALUES (?)";
