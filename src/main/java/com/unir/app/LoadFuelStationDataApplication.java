@@ -34,6 +34,19 @@ public class LoadFuelStationDataApplication {
 
             log.info("Conexión establecida con la base de datos Oracle");
 
+            String type = " from terrestrial stations csv file";
+            // Add fuel types to the database
+            List<FuelType> fuelTypes = readFuelTypeData(
+                    "fuel_type",
+                    0,
+                    type
+            );
+            intakeFuelTypes(
+                    connection,
+                    fuelTypes,
+                    type
+            );
+
             // Add fuel data from terrestrial stations to the database
             //addTerrestrialFuelData(connection);
             // Add fuel data from maritime stations to the database
@@ -48,43 +61,63 @@ public class LoadFuelStationDataApplication {
      * Function to add fuel data from maritime stations to the database
      */
     private static void addMaritimeFuelData(Connection connection) {
-
-        // Add fuel types to the database
-        List<FuelType> fuelTypes = readFuelTypeData(
-                "fuel_type",
-                0
-        );
-        intakeFuelTypes(connection, fuelTypes);
+        // Name of origin of the data
+        String type = " from maritime stations csv file";
         // Add provinces to the database
         Set<Province> provinces = readProvinceData(
                 "embarcacionesPrecios_es",
-                0
+                0,
+                type
         );
-        intakeProvinces(connection, provinces);
+        intakeProvinces(
+                connection,
+                provinces,
+                type
+        );
         // Add municipality to the database
         Set<Municipality> municipalities = readMunicipalityData(
                 "embarcacionesPrecios_es",
-                1
+                1,
+                type
         );
-        intakeMunicipalities(connection, municipalities);
+        intakeMunicipalities(
+                connection,
+                municipalities,
+                type
+        );
         // Add town to the database
         Set<Town> towns = readTownData(
                 "embarcacionesPrecios_es",
-                2
+                2,
+                type
         );
-        intakeTowns(connection, towns);
+        intakeTowns(
+                connection,
+                towns,
+                type
+        );
         // Add postal code to the database
         Set<PostalCode> postalCodes = readPostalCodeData(
                 "embarcacionesPrecios_es",
-                3
+                3,
+                type
         );
-        intakePostalCodes(connection, postalCodes);
+        intakePostalCodes(
+                connection,
+                postalCodes,
+                type
+        );
         // Add company to the database
         Set<Company> companies = readCompanyData(
                 "embarcacionesPrecios_es",
-                12
+                12,
+                type
         );
-        intakeCompanies(connection, companies);
+        intakeCompanies(
+                connection,
+                companies,
+                type
+        );
         // Add fuel station to the database
         List<FuelStation> fuelStations = readMaritimFuelStationData(
                 connection,
@@ -97,20 +130,90 @@ public class LoadFuelStationDataApplication {
                 4,
                 6,
                 5,
-                13
+                13,
+                type
         );
-        intakeFuelStations(connection, fuelStations);
+        intakeFuelStations(
+                connection,
+                fuelStations,
+                type
+        );
         // Add prices to the database
-        List<Price> prices = readPriceData(
+        List<Price> pricesGasolina95E5 = readPriceData(
                 connection,
                 "embarcacionesPrecios_es",
-                "gasolina 98 E5",
+                "gasolina 95 E5",
                 6,
                 5,
                 7,
-                -1
+                -1,
+                type
         );
-        intakePrices(connection, prices);
+        intakePrices(
+                connection,
+                pricesGasolina95E5,
+                "'gasolina 95 E5'" + type
+        );
+        List<Price> pricesGasolina95E10 = readPriceData(
+                connection,
+                "embarcacionesPrecios_es",
+                "gasolina 95 E10",
+                6,
+                5,
+                8,
+                -1,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasolina95E10,
+                "'gasolina 95 E10'" + type
+        );
+        List<Price> pricesGasoleoA = readPriceData(
+                connection,
+                "embarcacionesPrecios_es",
+                "gasoleo a",
+                6,
+                5,
+                9,
+                -1,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasoleoA,
+                "gasoleo a" + type
+        );
+        List<Price> pricesGasoleoB = readPriceData(
+                connection,
+                "embarcacionesPrecios_es",
+                "gasoleo b",
+                6,
+                5,
+                10,
+                -1,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasoleoB,
+                "gasoleo b" + type
+        );
+        List<Price> pricesGasoleoMaritimo = readPriceData(
+                connection,
+                "embarcacionesPrecios_es",
+                "gasoleo maritimo",
+                6,
+                5,
+                11,
+                -1,
+                type
+        );
+        intakePrices(
+                connection,
+                pricesGasoleoMaritimo,
+                "gasoleo maritimo" + type
+        );
     }
 
     /**
@@ -268,7 +371,7 @@ public class LoadFuelStationDataApplication {
      * Get date of export from the first line and second column of CSV file
      * @return - Date of export
      */
-    private static Date readDateData(String fileName) {
+    private static Date readDateData(String fileName, String type) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
@@ -288,7 +391,7 @@ public class LoadFuelStationDataApplication {
             }
             return null;
         } catch (IOException e) {
-            log.error("Error reading CSV file", e);
+            log.error("Error reading CSV file" + type, e);
             throw new RuntimeException(e);
         } catch (CsvValidationException e) {
             throw new RuntimeException(e);
@@ -301,7 +404,11 @@ public class LoadFuelStationDataApplication {
      * Read fuel types from CSV file
      * @return - List of fuel types
      */
-    private static List<FuelType> readFuelTypeData(String fileName, int column) {
+    private static List<FuelType> readFuelTypeData(
+            String fileName,
+            int column,
+            String type
+    ) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
@@ -325,7 +432,7 @@ public class LoadFuelStationDataApplication {
             }
             return fuelTypes;
         } catch (IOException e) {
-            log.error("Error reading CSV file", e);
+            log.error("Error reading CSV file" + type, e);
             throw new RuntimeException(e);
         } catch (CsvValidationException e) {
             throw new RuntimeException(e);
@@ -337,7 +444,11 @@ public class LoadFuelStationDataApplication {
      * Read provinces from CSV file
      * @return - List of provinces
      */
-    private static Set<Province> readProvinceData(String fileName, int column) {
+    private static Set<Province> readProvinceData(
+            String fileName,
+            int column,
+            String type
+    ) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
@@ -362,7 +473,7 @@ public class LoadFuelStationDataApplication {
             }
             return provinces;
         } catch (IOException e) {
-            log.error("Error reading CSV file", e);
+            log.error("Error reading CSV file" + type, e);
             throw new RuntimeException(e);
         } catch (CsvValidationException e) {
             throw new RuntimeException(e);
@@ -373,7 +484,11 @@ public class LoadFuelStationDataApplication {
      * Read municipalities from CSV file
      * @return - List of municipalities
      */
-    private static Set<Municipality> readMunicipalityData(String fileName, int column) {
+    private static Set<Municipality> readMunicipalityData(
+            String fileName,
+            int column,
+            String type
+    ) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
@@ -398,7 +513,7 @@ public class LoadFuelStationDataApplication {
             }
             return municipalities;
         } catch (IOException e) {
-            log.error("Error reading CSV file", e);
+            log.error("Error reading CSV file" + type, e);
             throw new RuntimeException(e);
         } catch (CsvValidationException e) {
             throw new RuntimeException(e);
@@ -409,7 +524,11 @@ public class LoadFuelStationDataApplication {
      * Read towns from CSV file
      * @return - List of towns
      */
-    private static Set<Town> readTownData(String fileName, int column) {
+    private static Set<Town> readTownData(
+            String fileName,
+            int column,
+            String type
+    ) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
@@ -434,7 +553,7 @@ public class LoadFuelStationDataApplication {
             }
             return towns;
         } catch (IOException e) {
-            log.error("Error reading CSV file", e);
+            log.error("Error reading CSV file" + type, e);
             throw new RuntimeException(e);
         } catch (CsvValidationException e) {
             throw new RuntimeException(e);
@@ -445,7 +564,11 @@ public class LoadFuelStationDataApplication {
      * Read postal codes from CSV file
      * @return - List of postal codes
      */
-    private static Set<PostalCode> readPostalCodeData(String fileName, int column) {
+    private static Set<PostalCode> readPostalCodeData(
+            String fileName,
+            int column,
+            String type
+    ) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
@@ -470,7 +593,7 @@ public class LoadFuelStationDataApplication {
             }
             return postalCodes;
         } catch (IOException e) {
-            log.error("Error reading CSV file", e);
+            log.error("Error reading CSV file" + type, e);
             throw new RuntimeException(e);
         } catch (CsvValidationException e) {
             throw new RuntimeException(e);
@@ -481,7 +604,11 @@ public class LoadFuelStationDataApplication {
      * Read companies from CSV file
      * @return - List of companies
      */
-    private static Set<Company> readCompanyData(String fileName, int column) {
+    private static Set<Company> readCompanyData(
+            String fileName,
+            int column,
+            String type
+    ) {
 
         // Try-with-resources. The reader closes automatically when exiting the try block.
         // CSVReader allows us to read the CSV file line by line.
@@ -506,7 +633,7 @@ public class LoadFuelStationDataApplication {
             }
             return companies;
         } catch (IOException e) {
-            log.error("Error reading CSV file", e);
+            log.error("Error reading CSV file" + type, e);
             throw new RuntimeException(e);
         } catch (CsvValidationException e) {
             throw new RuntimeException(e);
@@ -529,7 +656,8 @@ public class LoadFuelStationDataApplication {
             int colMargin,
             int colLatitude,
             int colLongitude,
-            int colOpeningHours
+            int colOpeningHours,
+            String type
     ) {
 
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
@@ -574,7 +702,7 @@ public class LoadFuelStationDataApplication {
             }
             return fuelStations;
         } catch (IOException | CsvValidationException | SQLException e) {
-            log.error("Error reading CSV file", e);
+            log.error("Error reading CSV file" + type, e);
             throw new RuntimeException(e);
         }
     }
@@ -594,7 +722,8 @@ public class LoadFuelStationDataApplication {
             int colAddress,
             int colLatitude,
             int colLongitude,
-            int colOpeningHours
+            int colOpeningHours,
+            String type
     ) {
 
         try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
@@ -639,7 +768,7 @@ public class LoadFuelStationDataApplication {
             }
             return fuelStations;
         } catch (IOException | CsvValidationException | SQLException e) {
-            log.error("Error reading CSV file", e);
+            log.error("Error reading CSV file" + type, e);
             throw new RuntimeException(e);
         }
     }
@@ -654,7 +783,8 @@ public class LoadFuelStationDataApplication {
             int colLatitude,
             int colLongitude,
             int colPrice,
-            int colCreateDate
+            int colCreateDate,
+            String type
     ) {
 
             try (CSVReader reader = new CSVReader(new FileReader("csv/" + fileName + ".csv"))) {
@@ -690,7 +820,7 @@ public class LoadFuelStationDataApplication {
                             java.util.Date parsed = format.parse(nextLine[colCreateDate].trim().toLowerCase());
                             createAt = new Date(parsed.getTime());
                         } else {
-                            createAt = readDateData(fileName);
+                            createAt = readDateData(fileName, type);
                         }
 
                         Price price = new Price(
@@ -705,7 +835,7 @@ public class LoadFuelStationDataApplication {
                 }
                 return prices;
             } catch (IOException | CsvValidationException | SQLException e) {
-                log.error("Error reading CSV file", e);
+                log.error("Error reading CSV file" + type, e);
                 throw new RuntimeException(e);
             } catch (ParseException e) {
                 throw new RuntimeException(e);
@@ -719,7 +849,11 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param fuelTypes - List of fuel types.
      */
-    private static void intakeFuelTypes(Connection connection, List<FuelType> fuelTypes) {
+    private static void intakeFuelTypes(
+            Connection connection,
+            List<FuelType> fuelTypes,
+            String type
+    ) {
 
         // Create query
         String query = "INSERT INTO fuel_type (name) VALUES (?)";
@@ -756,9 +890,9 @@ public class LoadFuelStationDataApplication {
             connection.commit();
             connection.setAutoCommit(true);
 
-            log.info("Fuel types data entered into the database");
+            log.info("Fuel types data entered into the database" + type);
         } catch (SQLException e) {
-            log.error("Error entering data into the database", e);
+            log.error("Error entering data into the database" + type, e);
             throw new RuntimeException(e);
         }
     }
@@ -769,7 +903,11 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param provinces - List of provinces.
      */
-    private static void intakeProvinces(Connection connection, Set<Province> provinces) {
+    private static void intakeProvinces(
+            Connection connection,
+            Set<Province> provinces,
+            String type
+    ) {
 
         // Create query
         String query = "INSERT INTO province (name) VALUES (?)";
@@ -806,9 +944,9 @@ public class LoadFuelStationDataApplication {
             connection.commit();
             connection.setAutoCommit(true);
 
-            log.info("Provinces data entered into the database");
+            log.info("Provinces data entered into the database" + type);
         } catch (SQLException e) {
-            log.error("Error entering data into the database", e);
+            log.error("Error entering data into the database" + type, e);
             throw new RuntimeException(e);
         }
     }
@@ -819,7 +957,11 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param municipalities - List of municipalities.
      */
-    private static void intakeMunicipalities(Connection connection, Set<Municipality> municipalities) {
+    private static void intakeMunicipalities(
+            Connection connection,
+            Set<Municipality> municipalities,
+            String type
+    ) {
 
         // Create query
         String query = "INSERT INTO municipality (name) VALUES (?)";
@@ -856,9 +998,9 @@ public class LoadFuelStationDataApplication {
             connection.commit();
             connection.setAutoCommit(true);
 
-            log.info("Municipalities data entered into the database");
+            log.info("Municipalities data entered into the database" + type);
         } catch (SQLException e) {
-            log.error("Error entering data into the database", e);
+            log.error("Error entering data into the database" + type, e);
             throw new RuntimeException(e);
         }
     }
@@ -869,7 +1011,11 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param towns - List of towns.
      */
-    private static void intakeTowns(Connection connection, Set<Town> towns) {
+    private static void intakeTowns(
+            Connection connection,
+            Set<Town> towns,
+            String type
+    ) {
 
         // Create query
         String query = "INSERT INTO town (name) VALUES (?)";
@@ -906,9 +1052,9 @@ public class LoadFuelStationDataApplication {
             connection.commit();
             connection.setAutoCommit(true);
 
-            log.info("Towns data entered into the database");
+            log.info("Towns data entered into the database" + type);
         } catch (SQLException e) {
-            log.error("Error entering data into the database", e);
+            log.error("Error entering data into the database" + type, e);
             throw new RuntimeException(e);
         }
     }
@@ -919,7 +1065,11 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param postalCodes - List of postal codes.
      */
-    private static void intakePostalCodes(Connection connection, Set<PostalCode> postalCodes) {
+    private static void intakePostalCodes(
+            Connection connection,
+            Set<PostalCode> postalCodes,
+            String type
+    ) {
 
         // Create query
         String query = "INSERT INTO postal_code (code) VALUES (?)";
@@ -956,9 +1106,9 @@ public class LoadFuelStationDataApplication {
             connection.commit();
             connection.setAutoCommit(true);
 
-            log.info("Postal codes data entered into the database");
+            log.info("Postal codes data entered into the database" + type);
         } catch (SQLException e) {
-            log.error("Error entering data into the database", e);
+            log.error("Error entering data into the database" + type, e);
             throw new RuntimeException(e);
         }
     }
@@ -969,7 +1119,11 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param companies - List of companies.
      */
-    private static void intakeCompanies(Connection connection, Set<Company> companies) {
+    private static void intakeCompanies(
+            Connection connection,
+            Set<Company> companies,
+            String type
+    ) {
 
         // Create query
         String query = "INSERT INTO company (name) VALUES (?)";
@@ -1006,9 +1160,9 @@ public class LoadFuelStationDataApplication {
             connection.commit();
             connection.setAutoCommit(true);
 
-            log.info("Companies data entered into the database");
+            log.info("Companies data entered into the database" + type);
         } catch (SQLException | IOException e) {
-            log.error("Error entering data into the database", e);
+            log.error("Error entering data into the database" + type, e);
             throw new RuntimeException(e);
         }
     }
@@ -1019,7 +1173,11 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param fuelStations - List of fuel stations.
      */
-    private static void intakeFuelStations(Connection connection, List<FuelStation> fuelStations) {
+    private static void intakeFuelStations(
+            Connection connection,
+            List<FuelStation> fuelStations,
+            String type
+    ) {
 
         // Creamos la query
         String query = "INSERT INTO fuel_station (company_id, province_id, municipality_id, town_id, postal_code_id, address, margin, latitude, longitude, opening_hours, is_maritime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -1066,9 +1224,9 @@ public class LoadFuelStationDataApplication {
             connection.commit();
             connection.setAutoCommit(true);
 
-            log.info("Fuel stations data entered into the database");
+            log.info("Fuel stations data entered into the database" + type);
         } catch (SQLException e) {
-            log.error("Error entering data into the database", e);
+            log.error("Error entering data into the database" + type, e);
             throw new RuntimeException(e);
         }
     }
@@ -1079,7 +1237,7 @@ public class LoadFuelStationDataApplication {
      * @param connection - Connection to the database.
      * @param prices - List of prices.
      */
-    private static void intakePrices(Connection connection, List<Price> prices) {
+    private static void intakePrices(Connection connection, List<Price> prices, String fuelName) {
 
         // Create query
         String query = "INSERT INTO price (fuel_station_id, fuel_type_id, price, create_at) VALUES (?, ?, ?, ?)";
@@ -1119,9 +1277,9 @@ public class LoadFuelStationDataApplication {
             connection.commit();
             connection.setAutoCommit(true);
 
-            log.info("Prices data entered into the database");
+            log.info("Prices data entered into the database " + fuelName);
         } catch (SQLException e) {
-            log.error("Error entering data into the database", e);
+            log.error("Error entering data into the database " + fuelName, e);
             throw new RuntimeException(e);
         }
     }

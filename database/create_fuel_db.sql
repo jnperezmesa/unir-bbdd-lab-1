@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS price (
     id INT AUTO_INCREMENT PRIMARY KEY,
     fuel_type_id INT,
     fuel_station_id INT,
-    price DECIMAL(6, 3),
+    price DECIMAL(7, 3),
     create_at DATE,
     FOREIGN KEY (fuel_type_id) REFERENCES fuel_type(id),
     FOREIGN KEY (fuel_station_id) REFERENCES fuel_station(id)
