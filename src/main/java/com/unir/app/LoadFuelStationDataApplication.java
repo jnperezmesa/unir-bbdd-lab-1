@@ -36,82 +36,83 @@ public class LoadFuelStationDataApplication {
 
             log.info("Conexión establecida con la base de datos Oracle");
 
-            // Add fuel types to the database
-            Set<FuelType> fuelTypes = readFuelTypeData(
-                    "fuel_type",
-                    0
-            );
-            intakeFuelTypes(connection, fuelTypes);
-            // Add provinces to the database
-            Set<Province> provinces = readProvinceData(
-                    "embarcacionesPrecios_es",
-                    0
-            );
-            intakeProvinces(connection, provinces);
-            // Add municipality to the database
-            Set<Municipality> municipalities = readMunicipalityData(
-                    "embarcacionesPrecios_es",
-                    1
-            );
-            intakeMunicipalities(connection, municipalities);
-            // Add town to the database
-            Set<Town> towns = readTownData(
-                    "embarcacionesPrecios_es",
-                    2
-            );
-            intakeTowns(connection, towns);
-            // Add postal code to the database
-            Set<PostalCode> postalCodes = readPostalCodeData(
-                    "embarcacionesPrecios_es",
-                    3
-            );
-            intakePostalCodes(connection, postalCodes);
-            // Add company to the database
-            Set<Company> companies = readCompanyData(
-                    "embarcacionesPrecios_es",
-                    12
-            );
-            intakeCompanies(connection, companies);
-            // Add fuel station to the database
-            List<FuelStation> fuelStations = readMaritimFuelStationData(
-                    connection,
-                    "embarcacionesPrecios_es",
-                    12,
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    6,
-                    5,
-                    13
-            );
-            intakeFuelStations(connection, fuelStations);
-            // Add prices to the database
-            List<Price> prices = readPriceData(
-                    connection,
-                    "embarcacionesPrecios_es",
-                    "gasolina 95 e5",
-                    6,
-                    5,
-                    7,
-                    -1
-            );
-            intakePrices(connection, prices);
-            prices = readPriceData(
-                    connection,
-                    "embarcacionesPrecios_es",
-                    "gasolina 95 e10",
-                    6,
-                    5,
-                    8,
-                    -1
-            );
-            intakePrices(connection, prices);
+            // Add fuel data from terrestrial stations to the database
+            //addTerrestrialFuelData(connection);
+            // Add fuel data from maritime stations to the database
+            addMaritimeFuelData(connection);
 
         } catch (Exception e) {
             log.error("Error al tratar con la base de datos", e);
         }
+    }
+
+    /**
+     * Function to add fuel data from maritime stations to the database
+     */
+    private static void addMaritimeFuelData(Connection connection) {
+
+        // Add fuel types to the database
+        Set<FuelType> fuelTypes = readFuelTypeData(
+                "fuel_type",
+                0
+        );
+        intakeFuelTypes(connection, fuelTypes);
+        // Add provinces to the database
+        Set<Province> provinces = readProvinceData(
+                "embarcacionesPrecios_es",
+                0
+        );
+        intakeProvinces(connection, provinces);
+        // Add municipality to the database
+        Set<Municipality> municipalities = readMunicipalityData(
+                "embarcacionesPrecios_es",
+                1
+        );
+        intakeMunicipalities(connection, municipalities);
+        // Add town to the database
+        Set<Town> towns = readTownData(
+                "embarcacionesPrecios_es",
+                2
+        );
+        intakeTowns(connection, towns);
+        // Add postal code to the database
+        Set<PostalCode> postalCodes = readPostalCodeData(
+                "embarcacionesPrecios_es",
+                3
+        );
+        intakePostalCodes(connection, postalCodes);
+        // Add company to the database
+        Set<Company> companies = readCompanyData(
+                "embarcacionesPrecios_es",
+                12
+        );
+        intakeCompanies(connection, companies);
+        // Add fuel station to the database
+        List<FuelStation> fuelStations = readMaritimFuelStationData(
+                connection,
+                "embarcacionesPrecios_es",
+                12,
+                0,
+                1,
+                2,
+                3,
+                4,
+                6,
+                5,
+                13
+        );
+        intakeFuelStations(connection, fuelStations);
+        // Add prices to the database
+        List<Price> prices = readPriceData(
+                connection,
+                "embarcacionesPrecios_es",
+                "gasolina 98 E5",
+                6,
+                5,
+                7,
+                -1
+        );
+        intakePrices(connection, prices);
     }
 
     /**
@@ -252,7 +253,7 @@ public class LoadFuelStationDataApplication {
      * @param createAt - Date of the price
      */
     private static boolean getPriceId(Connection connection, int fuelStationId, int fuelTypeId, Date createAt) throws SQLException {
-        String query = "SELECT id FROM price WHERE fuel_station_id = ? AND fuel_type_id = ? AND date = ?";
+        String query = "SELECT id FROM price WHERE fuel_station_id = ? AND fuel_type_id = ? AND create_at = ?";
         PreparedStatement statement = connection.prepareStatement(query);
         statement.setInt(1, fuelStationId);
         statement.setInt(2, fuelTypeId);
@@ -283,7 +284,7 @@ public class LoadFuelStationDataApplication {
 
                 // Create date and return it
                 SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-                java.util.Date parsed = format.parse(nextLine[2]);
+                java.util.Date parsed = format.parse(nextLine[1]);
                 Date date = new Date(parsed.getTime());
                 return date;
             }
@@ -665,26 +666,44 @@ public class LoadFuelStationDataApplication {
                 String[] nextLine;
 
                 while((nextLine = reader.readNext()) != null) {
-                    int fuelStationId = getFuelStationId(connection, Float.parseFloat(nextLine[colLatitude]), Float.parseFloat(nextLine[colLongitude]));
-                    int fuelTypeId = getFuelTypeId(connection, fuelName);
-                    Date createAt;
+                    float latitude = 0.0f;
+                    float longitude = 0.0f;
+                    float priceValue = 0.0f;
 
-                    if (colCreateDate != -1 && !nextLine[colCreateDate].trim().isEmpty()) {
-                        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-                        java.util.Date parsed = format.parse(nextLine[colCreateDate].trim().toLowerCase());
-                        createAt = new Date(parsed.getTime());
-                    } else {
-                        createAt = readDateData(fileName);
+                    if (!nextLine[colLatitude].trim().isEmpty()) {
+                        latitude = Float.parseFloat(nextLine[colLatitude].trim());
                     }
 
-                    Price price = new Price(
-                            0,
-                            fuelStationId,
-                            fuelTypeId,
-                            Float.parseFloat(nextLine[colPrice].trim().toLowerCase()),
-                            createAt
-                    );
-                    prices.add(price);
+                    if (!nextLine[colLongitude].trim().isEmpty()) {
+                        longitude = Float.parseFloat(nextLine[colLongitude].trim());
+                    }
+
+                    if (!nextLine[colPrice].trim().isEmpty()) {
+                        priceValue = Float.parseFloat(nextLine[colPrice].trim().toLowerCase());
+                    }
+
+                    int fuelStationId = getFuelStationId(connection, latitude, longitude);
+                    int fuelTypeId = getFuelTypeId(connection, fuelName);
+                    if (!(fuelStationId == -1) && !(priceValue == 0.0f) && !(fuelTypeId == -1)) {
+                        Date createAt;
+
+                        if (colCreateDate != -1 && !nextLine[colCreateDate].trim().isEmpty()) {
+                            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+                            java.util.Date parsed = format.parse(nextLine[colCreateDate].trim().toLowerCase());
+                            createAt = new Date(parsed.getTime());
+                        } else {
+                            createAt = readDateData(fileName);
+                        }
+
+                        Price price = new Price(
+                                0,
+                                fuelStationId,
+                                fuelTypeId,
+                                priceValue,
+                                createAt
+                        );
+                        prices.add(price);
+                    }
                 }
                 return prices;
             } catch (IOException | CsvValidationException | SQLException e) {
@@ -1065,7 +1084,7 @@ public class LoadFuelStationDataApplication {
     private static void intakePrices(Connection connection, List<Price> prices) {
 
         // Create query
-        String query = "INSERT INTO price (fuel_station_id, fuel_type_id, price, date) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO price (fuel_station_id, fuel_type_id, price, create_at) VALUES (?, ?, ?, ?)";
         int lote = 100;
         int contador = 0;
 
