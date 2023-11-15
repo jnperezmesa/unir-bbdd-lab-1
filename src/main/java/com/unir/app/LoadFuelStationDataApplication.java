@@ -48,7 +48,7 @@ public class LoadFuelStationDataApplication {
             );
 
             // Add fuel data from terrestrial stations to the database
-            addTerrestrialFuelData(connection);
+            //addTerrestrialFuelData(connection);
             // Add fuel data from maritime stations to the database
             addMaritimeFuelData(connection);
 
