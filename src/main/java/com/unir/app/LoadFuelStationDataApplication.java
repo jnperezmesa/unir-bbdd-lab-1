@@ -50,7 +50,7 @@ public class LoadFuelStationDataApplication {
             // Add fuel data from terrestrial stations to the database
             addTerrestrialFuelData(connection);
             // Add fuel data from maritime stations to the database
-            //addMaritimeFuelData(connection);
+            addMaritimeFuelData(connection);
 
         } catch (Exception e) {
             log.error("Error al tratar con la base de datos", e);
