@@ -1,5 +1,5 @@
 -- Nombre de la empresa con más estaciones de servicio terrestres.
-SELECT c.name, COUNT(*) AS number_of_stations
+EXPLAIN ANALYZE SELECT c.name, COUNT(*) AS number_of_stations
 FROM company AS c
 JOIN fuel_station AS fs ON c.id = fs.company_id
 WHERE fs.is_maritime = FALSE

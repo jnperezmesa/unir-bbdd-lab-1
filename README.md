@@ -35,3 +35,8 @@ java -jar target/bbdda-jdbc-1.0-SNAPSHOT.jar
 mvn clean
 ```
 Después de ejecutar este comando, ejecutar el comando para instalar dependencias con maven
+
+## Variables de entorno
+```
+MYSQL_USER=root;MYSQL_PASSWORD=mysql
+```
