@@ -47,3 +47,34 @@ JOIN province AS prov ON fs.province_id = prov.id
 WHERE ft.name = 'Gasolina 95 E5' AND fs.is_maritime = TRUE
 ORDER BY p.price DESC
 LIMIT 1;
+
+-- Listar todas las estaciones de servicio existentes con los precios de los combustibles
+SELECT
+    fs.is_maritime AS 'Maritima',
+    fs.margin AS 'Margen',
+    prov.name AS 'Provincia',
+    muni.name AS 'Municipio',
+    town.name AS 'Localidad',
+    pc.code AS 'Codigo Postal',
+    fs.address AS 'Direccion',
+    fs.latitude AS 'Latitud',
+    fs.longitude AS 'Longitud',
+    (SELECT MIN(p.create_at)
+     FROM price p
+     WHERE p.fuel_station_id = fs.id) AS 'Fecha Primer Combustible',
+    (
+        SELECT GROUP_CONCAT(CONCAT(fuel_type.name, ': ', price.price) ORDER BY price.create_at SEPARATOR ', ')
+        FROM price
+        JOIN fuel_type ON price.fuel_type_id = fuel_type.id
+        WHERE price.fuel_station_id = fs.id
+    ) AS 'Combustibles'
+FROM
+    fuel_station fs
+JOIN
+    province prov ON fs.province_id = prov.id
+JOIN
+    municipality muni ON fs.municipality_id = muni.id
+JOIN
+    town ON fs.town_id = town.id
+JOIN
+    postal_code pc ON fs.postal_code_id = pc.id;
