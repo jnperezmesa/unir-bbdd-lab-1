@@ -50,15 +50,16 @@ LIMIT 1;
 
 -- Listar todas las estaciones de servicio existentes con los precios de los combustibles
 SELECT
-    fs.is_maritime AS 'Maritima',
-    fs.margin AS 'Margen',
-    prov.name AS 'Provincia',
-    muni.name AS 'Municipio',
-    town.name AS 'Localidad',
-    pc.code AS 'Codigo Postal',
-    fs.address AS 'Direccion',
-    fs.latitude AS 'Latitud',
-    fs.longitude AS 'Longitud',
+    fs.is_maritime AS 'is_maritime',
+    fs.margin AS 'margin',
+    prov.name AS 'province',
+    muni.name AS 'municipality',
+    town.name AS 'locality',
+    pc.code AS 'postalCode',
+    fs.address AS 'direction',
+    fs.latitude AS 'latitude',
+    fs.longitude AS 'longitude',
+    c.name AS 'company',
     (SELECT MIN(p.create_at)
      FROM price p
      WHERE p.fuel_station_id = fs.id) AS 'Fecha Primer Combustible',
@@ -78,3 +79,5 @@ JOIN
     town ON fs.town_id = town.id
 JOIN
     postal_code pc ON fs.postal_code_id = pc.id;
+JOIN
+    company c ON fs.company_id = c.id
