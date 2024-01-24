@@ -15,7 +15,7 @@ public class GetData {
      * @param connection - Connection to the database
      * @throws SQLException
      */
-    public static int getAllStations(Connection connection) throws SQLException {
+    public static void getAllStations(Connection connection) throws SQLException {
         String query = "SELECT id FROM town WHERE name =  LIMIT 1";
         PreparedStatement statement = connection.prepareStatement(query);
         ResultSet resultSet = statement.executeQuery();
