@@ -84,7 +84,7 @@ public class ETLProcess {
             String accessSecret = System.getenv("BONSAI_ACCESS_SECRET");
             // " + accessKey + ":" + accessSecret + "@
             String baseUriElastic = "https://gasolineras-4057692379.eu-west-1.bonsaisearch.net:443";
-            //OWk4a2xkYTI4aTpsMjFmcHV3NXQ0
+            
             HttpRequest testRequest = HttpRequest.newBuilder()
                     .uri(URI.create(baseUriElastic.concat("/stations/_mapping")))
                     .header("Authorization", "Basic " + System.getenv("BONSAI_AUTH"))
@@ -101,6 +101,7 @@ public class ETLProcess {
 
             HttpResponse<String> response = client.send(testRequest, HttpResponse.BodyHandlers.ofString());
             System.out.println(response.body());
+
         } catch (Exception e) {
             log.error("Error al tratar con la base de datos", e);
         }
