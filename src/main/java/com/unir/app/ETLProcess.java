@@ -46,23 +46,19 @@ public class ETLProcess {
     }
 
     public enum Province {
-        ALBACETE("ALBACETE"), ALICANTE("ALICANTE"), ALMERIA("ALMERÍA"),
-        ALAVA("ARABA/ÁLAVA"), ASTURIAS("ASTURIAS"), AVILA("ÁVILA"),
-        BADAJOZ("BADAJOZ"), BALEARES("BALEARS (ILLES)"), BARCELONA("BARCELONA"),
-        BIZKAIA("BIZKAIA"), BURGOS("BURGOS"), CACERES("CÁCERES"),
-        CADIZ("CÁDIZ"), CANTABRIA("CANTABRIA"), CASTELLON("CASTELLÓN"),
-        CEUTA("CEUTA"), REAL("CIUDAD REAL"), CORDOBA("CÓRDOBA"),
-        CORUNA("CORUÑA (A)"), CUENCA("CUENCA"), GIPUZKOA("GIPUZKOA"),
-        GIRONA("GIRONA"), GRANADA("GRANADA"), GUADALAJARA("GUADALAJARA"),
-        HUELVA("HUELVA"), HUESCA("HUESCA"), JAEN("JAÉN"), LEON("LEÓN"),
-        LLEIDA("LLEIDA"), LUGO("LUGO"), MADRID("MADRID"), MALAGA("MÁLAGA"),
-        MELILLA("MELILLA"), MURCIA("MURCIA"), NAVARRA("NAVARRA"),
-        OURENSE("OURENSE"), PALENCIA("PALENCIA"), PALMAS("PALMAS (LAS)"),
-        PONTEVEDRA("PONTEVEDRA"), RIOJA("RIOJA (LA)"), SALAMANCA("SALAMANCA"),
-        TENERIFE("SANTA CRUZ DE TENERIFE"), SEGOVIA("SEGOVIA"), SEVILLA("SEVILLA"),
-        SORIA("SORIA"), TARRAGONA("TARRAGONA"), TERUEL("TERUEL"),
-        TOLEDO("TOLEDO"), VALENCIA("VALENCIA / VALÈNCIA"),
-        VALLADOLID("VALLADOLID"), ZAMORA("ZAMORA"), ZARAGOZA("ZARAGOZA");
+        ALBACETE("albacete"), ALICANTE("alicante"), ALMERIA("almería"), ALAVA("araba/álava"),
+        ASTURIAS("asturias"), AVILA("ávila"), BADAJOZ("badajoz"), BALEARES("balears (illes)"),
+        BARCELONA("barcelona"), BIZKAIA("bizkaia"), BURGOS("burgos"), CACERES("cáceres"),
+        CADIZ("cádiz"), CANTABRIA("cantabria"), CASTELLON("castellón"), CEUTA("ceuta"),
+        REAL("ciudad real"), CORDOBA("córdoba"), CORUNA("coruña (a)"), CUENCA("cuenca"),
+        GIPUZKOA("gipuzkoa"), GIRONA("girona"), GRANADA("granada"), GUADALAJARA("guadalajara"),
+        HUELVA("huelva"), HUESCA("huesca"), JAEN("jaén"), LEON("león"), LLEIDA("lleida"),
+        LUGO("lugo"), MADRID("madrid"), MALAGA("málaga"), MELILLA("melilla"),
+        MURCIA("murcia"), NAVARRA("navarra"), OURENSE("ourense"), PALENCIA("palencia"),
+        PALMAS("palmas (las)"), PONTEVEDRA("pontevedra"), RIOJA("rioja (la)"), SALAMANCA("salamanca"),
+        TENERIFE("santa cruz de tenerife"), SEGOVIA("segovia"), SEVILLA("sevilla"), SORIA("soria"),
+        TARRAGONA("tarragona"), TERUEL("teruel"), TOLEDO("toledo"), VALENCIA("valencia / valència"),
+        VALLADOLID("valladolid"), ZAMORA("zamora"), ZARAGOZA("zaragoza");
         private String nombre;
 
         Province(String nombre) {
@@ -86,7 +82,7 @@ public class ETLProcess {
 
             String accessKey = System.getenv("BONSAI_ACCESS_KEY");
             String accessSecret = System.getenv("BONSAI_ACCESS_SECRET");
-            //" + accessKey + ":" + accessSecret + "@
+            // " + accessKey + ":" + accessSecret + "@
             String baseUriElastic = "https://gasolineras-4057692379.eu-west-1.bonsaisearch.net:443";
 
             HttpRequest testRequest = HttpRequest.newBuilder()
@@ -104,7 +100,7 @@ public class ETLProcess {
             HttpClient client = HttpClient.newBuilder().build();
 
             HttpResponse<String> response = client.send(testRequest, HttpResponse.BodyHandlers.ofString());
-            
+
         } catch (Exception e) {
             log.error("Error al tratar con la base de datos", e);
         }
