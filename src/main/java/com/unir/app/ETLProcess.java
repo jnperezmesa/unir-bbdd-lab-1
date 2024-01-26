@@ -219,7 +219,7 @@ public class ETLProcess {
             Map<Fuels, Double> fuels = getFuels(connection, gasStationId);
 
             Boolean isMaritime = resultSet.getBoolean("is_maritime");
-            Type type = isMaritime ? Type.marítima : Type.terrestre;
+            Type type = isMaritime ? Type.maritima : Type.terrestre;
 
             Margin margin = Margin.valueOf(resultSet.getString("margin"));
             Province province = Province.retrieveProvinceByName(resultSet.getString("province"));
