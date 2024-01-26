@@ -119,31 +119,34 @@ public class ETLProcess {
             String jsonRequest = gson.toJson(gasStations);
             System.out.println(jsonRequest);
 
-/*
+            /*
             String accessKey = System.getenv("BONSAI_ACCESS_KEY");
             String accessSecret = System.getenv("BONSAI_ACCESS_SECRET");
-            // " + accessKey + ":" + accessSecret + "@
             String baseUriElastic = "https://gasolineras-4057692379.eu-west-1.bonsaisearch.net:443";
 
             String bonsaiAuth = Base64.getEncoder().encodeToString((accessKey + ":" + accessSecret).getBytes());
 
+            /*
             HttpRequest testRequest = HttpRequest.newBuilder()
                     .uri(URI.create(baseUriElastic.concat("/stations/_mapping")))
                     .header("Authorization", "Basic " + bonsaiAuth)
                     .GET().build();
 
+
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUriElastic.concat("/stations/_doc")))
-                    .header("Content-Type", "aplication/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
+                    .header("Content-Type", "application/json")
                     .header("Authorization", "Basic " + bonsaiAuth)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
+
 
 
             HttpClient client = HttpClient.newBuilder().build();
 
-            HttpResponse<String> response = client.send(testRequest, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println(response.body());
-             */
+            */
+
         } catch (Exception e) {
             log.error("Error al tratar con la base de datos", e);
         }
