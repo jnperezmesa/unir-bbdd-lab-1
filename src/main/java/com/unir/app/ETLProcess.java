@@ -13,6 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.*;
+import java.util.Base64;
 
 @Slf4j
 public class ETLProcess {
@@ -85,21 +86,24 @@ public class ETLProcess {
             // " + accessKey + ":" + accessSecret + "@
             String baseUriElastic = "https://gasolineras-4057692379.eu-west-1.bonsaisearch.net:443";
 
+            String bonsaiAuth = Base64.getEncoder().encodeToString((accessKey + ":" + accessSecret).getBytes());
+
             HttpRequest testRequest = HttpRequest.newBuilder()
                     .uri(URI.create(baseUriElastic.concat("/stations/_mapping")))
-                    .header("Authorization", "Basic OWk4a2xkYTI4aTpsMjFmcHV3NXQ0")
+                    .header("Authorization", "Basic " + bonsaiAuth)
                     .GET().build();
             /*
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUriElastic.concat("/stations/_doc")))
                     .header("Content-Type", "aplication/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
-                    .header("Authorization", "Basic OWk4a2xkYTI4aTpsMjFmcHV3NXQ0")
+                    .header("Authorization", "Basic " + bonsaiAuth)
             */
 
             HttpClient client = HttpClient.newBuilder().build();
 
             HttpResponse<String> response = client.send(testRequest, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
 
         } catch (Exception e) {
             log.error("Error al tratar con la base de datos", e);
