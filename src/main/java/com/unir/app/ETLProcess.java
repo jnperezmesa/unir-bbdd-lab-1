@@ -30,12 +30,12 @@ public class ETLProcess {
 
     public enum Fuels {
 
-        gasolina_95_e5("gasolina 95 e5"), gasolina_95_e10("gasolina 95 e10"), gasoleo_a("gasóleo a"),
-        gasoleo_b("gasóleo b"), gasolina95_e5_pr("gasolina 95 e5 premium"), gasolina_98_e5("gasolina 98 e5"),
-        gasolina_98_e10("gasolina 98 e5"), gasoleo_pr("gasóleo premium"), gasoleo_c("gasóleo c"),
-        bioetanol("bioetanol"), biodiesel("biodiésel"), glp("gases licuados del petróleo"),
-        gncom("gas natural comprimido"), gnl("gas natural licuado"), hidrogeno("hidrógeno"),
-        gasoleo_mar("gasóleo de uso marítimo");
+        Gasolina95E5("gasolina 95 e5"), Gasolina95E10("gasolina 95 e10"), GasoleoA("gasóleo a"),
+        GasoleoB("gasóleo b"), Gasolina95E5Pr("gasolina 95 e5 premium"), Gasolina98E5("gasolina 98 e5"),
+        Gasolina98E10("gasolina 98 e5"), GasoleoPr("gasóleo premium"), GasoleoC("gasóleo c"),
+        Bioetanol("bioetanol"), Biodiesel("biodiésel"), GLP("gases licuados del petróleo"),
+        GNCom("gas natural comprimido"), GNL("gas natural licuado"), Hidrogeno("hidrógeno"),
+        GasoleoMar("gasóleo de uso marítimo");
         private String name;
 
         Fuels(String fuelName) {
@@ -239,7 +239,6 @@ public class ETLProcess {
                     resultSet.getString("registration_date"),
                     resultSet.getDate("registration_date")
             );
-            System.out.println(gasStation.getPostalCode());
             gasStations.add(gasStation);
         }
         return gasStations.toArray(new GasStation[gasStations.size()]);
