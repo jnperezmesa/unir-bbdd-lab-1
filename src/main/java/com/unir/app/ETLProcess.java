@@ -13,8 +13,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Base64;
+import java.sql.Date;
+import java.util.*;
 
 @Slf4j
 public class ETLProcess {
@@ -25,25 +25,34 @@ public class ETLProcess {
     }
 
     public enum Type {
-        marítima, terrestre
+        maritima, terrestre
     }
 
     public enum Fuels {
 
-        gasolina95E5("gasolina 95 e5"), gasolina95E10("gasolina 95 e10"), gasoleoA("gasóleo a"),
-        gasoleoB("gasóleo b"), gasolina95E5Pr("gasolina 95 e5 premium"), gasolina98E5("gasolina 98 e5"),
-        gasolina98E10("gasolina 98 e5"), gasoleoPr("gasóleo premium"), gasoleoC("gasóleo c"),
-        bioetanol("bioetanol"), biodiesel("biodiésel"), GLP("gases licuados del petróleo"),
-        GNCom(" gas natural comprimido"), GNL("gas natural licuado"), hidrogeno("hidrógeno"),
-        gasoleoMar("gasóleo de uso marítimo");
-        private String nombre;
+        gasolina_95_e5("gasolina 95 e5"), gasolina_95_e10("gasolina 95 e10"), gasoleo_a("gasóleo a"),
+        gasoleo_b("gasóleo b"), gasolina95_e5_pr("gasolina 95 e5 premium"), gasolina_98_e5("gasolina 98 e5"),
+        gasolina_98_e10("gasolina 98 e5"), gasoleo_pr("gasóleo premium"), gasoleo_c("gasóleo c"),
+        bioetanol("bioetanol"), biodiesel("biodiésel"), glp("gases licuados del petróleo"),
+        gncom("gas natural comprimido"), gnl("gas natural licuado"), hidrogeno("hidrógeno"),
+        gasoleo_mar("gasóleo de uso marítimo");
+        private String name;
 
-        Fuels(String nombre) {
-            nombre = nombre;
+        Fuels(String fuelName) {
+            this.name = fuelName;
         }
 
-        String getNombre() {
-            return nombre;
+        String getFuelName() {
+            return name;
+        }
+
+        public static Fuels retrieveByFuelName(String fuelName) {
+            for (Fuels fuel : Fuels.values()) {
+                if (Objects.equals(fuel.getFuelName(), fuelName)) {
+                    return fuel;
+                }
+            }
+            return null;
         }
     }
 
@@ -61,14 +70,24 @@ public class ETLProcess {
         TENERIFE("santa cruz de tenerife"), SEGOVIA("segovia"), SEVILLA("sevilla"), SORIA("soria"),
         TARRAGONA("tarragona"), TERUEL("teruel"), TOLEDO("toledo"), VALENCIA("valencia / valència"),
         VALLADOLID("valladolid"), ZAMORA("zamora"), ZARAGOZA("zaragoza");
-        private String nombre;
 
-        Province(String nombre) {
-            nombre = nombre;
+        private String name;
+
+        Province(String provinceName) {
+            this.name = provinceName;
         }
 
-        String getNombre() {
-            return nombre;
+        String getProvinceName() {
+            return name;
+        }
+
+        public static Province retrieveProvinceByName(String provinceName) {
+            for (Province province : Province.values()) {
+                if (Objects.equals(province.getProvinceName(), provinceName)) {
+                    return province;
+                }
+            }
+            return null;
         }
     }
 
@@ -159,14 +178,9 @@ public class ETLProcess {
         ArrayList<Fuel> fuels = new ArrayList<>();
 
         while (resultSet.next()) {
-            Fuel fuel = new Fuel(
-                    Fuels.valueOf(resultSet.getString("fuel_type")),
-                    resultSet.getDouble("price"),
-                    resultSet.getDate("create_at")
-            );
-            fuels.add(fuel);
+            fuels.put(Fuels.retrieveByFuelName(resultSet.getString("fuel_type")), resultSet.getDouble("price"));
         }
-        return (Fuel[]) fuels.toArray();
+        return fuels;
     }
 
     /**
@@ -215,7 +229,7 @@ public class ETLProcess {
             Type type = isMaritime ? Type.marítima : Type.terrestre;
 
             Margin margin = Margin.valueOf(resultSet.getString("margin"));
-            Province province = Province.valueOf(resultSet.getString("province"));
+            Province province = Province.retrieveProvinceByName(resultSet.getString("province"));
 
             GasStation gasStation = new GasStation(
                     type,
@@ -234,6 +248,6 @@ public class ETLProcess {
             System.out.println(gasStation.getPostalCode());
             gasStations.add(gasStation);
         }
-        return (GasStation[]) gasStations.toArray();
+        return gasStations.toArray(new GasStation[gasStations.size()]);
     }
 }
