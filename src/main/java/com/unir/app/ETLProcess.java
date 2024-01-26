@@ -118,6 +118,16 @@ public class ETLProcess {
             Gson gson = new Gson();
             String jsonRequest = gson.toJson(gasStations);
             System.out.println(jsonRequest);
+            /*
+                Enseñar el ejemplo a Javier
+                
+                Eliminar primer yu ultimo caracter del json que es '[' y ']'
+
+                '}*{' pasar a '
+                }
+                {"index":{"_index":"stations"}}
+                {'
+            */
 
             /*
             String accessKey = System.getenv("BONSAI_ACCESS_KEY");
