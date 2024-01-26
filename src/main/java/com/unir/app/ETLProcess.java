@@ -104,16 +104,9 @@ public class ETLProcess {
         String direction;
         double latitude;
         double longitude;
-        Fuel[] fuels;
+        Map<Fuels, Double> fuels;
         String brand;
         String schedule;
-    }
-
-    @AllArgsConstructor
-    @Getter
-    private static class Fuel {
-        Fuels type;
-        Double price;
         Date dateData;
     }
 
@@ -126,7 +119,7 @@ public class ETLProcess {
             String jsonRequest = gson.toJson(gasStations);
             System.out.println(jsonRequest);
 
-            /*
+/*
             String accessKey = System.getenv("BONSAI_ACCESS_KEY");
             String accessSecret = System.getenv("BONSAI_ACCESS_SECRET");
             // " + accessKey + ":" + accessSecret + "@
@@ -160,7 +153,7 @@ public class ETLProcess {
      * función que elimina los espacios en blanco de la cadena
      */
 
-    private static Fuel[] getFuels(Connection connection, int fuelStationId) throws SQLException {
+    private static Map<Fuels, Double> getFuels(Connection connection, int fuelStationId) throws SQLException {
         String query = "SELECT\n" +
                 "    fuel_type.name AS 'fuel_type',\n" +
                 "    price.price AS 'price',\n" +
@@ -175,7 +168,7 @@ public class ETLProcess {
         statement.setInt(1, fuelStationId);
         ResultSet resultSet = statement.executeQuery();
 
-        ArrayList<Fuel> fuels = new ArrayList<>();
+        Map<Fuels, Double> fuels = new HashMap<Fuels, Double>();
 
         while (resultSet.next()) {
             fuels.put(Fuels.retrieveByFuelName(resultSet.getString("fuel_type")), resultSet.getDouble("price"));
@@ -223,7 +216,7 @@ public class ETLProcess {
 
         while (resultSet.next()) {
             int gasStationId = resultSet.getInt("id");
-            Fuel[] fuels = getFuels(connection, gasStationId);
+            Map<Fuels, Double> fuels = getFuels(connection, gasStationId);
 
             Boolean isMaritime = resultSet.getBoolean("is_maritime");
             Type type = isMaritime ? Type.marítima : Type.terrestre;
@@ -243,7 +236,8 @@ public class ETLProcess {
                     resultSet.getDouble("longitude"),
                     fuels,
                     resultSet.getString("company"),
-                    resultSet.getString("registration_date")
+                    resultSet.getString("registration_date"),
+                    resultSet.getDate("registration_date")
             );
             System.out.println(gasStation.getPostalCode());
             gasStations.add(gasStation);
