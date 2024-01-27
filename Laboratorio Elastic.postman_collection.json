@@ -1,0 +1,99 @@
+{
+	"info": {
+		"_postman_id": "0eeab5c9-3476-43c4-bc55-58ddb244841e",
+		"name": "Laboratorio Elastic",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31333090"
+	},
+	"item": [
+		{
+			"name": "Map index",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://9i8klda28i:l21fpuw5t4@gasolineras-4057692379.eu-west-1.bonsaisearch.net:443/stations/_mapping",
+					"protocol": "https",
+					"auth": {
+						"user": "9i8klda28i",
+						"password": "l21fpuw5t4"
+					},
+					"host": [
+						"gasolineras-4057692379",
+						"eu-west-1",
+						"bonsaisearch",
+						"net"
+					],
+					"port": "443",
+					"path": [
+						"stations",
+						"_mapping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create index",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "https://9i8klda28i:l21fpuw5t4@gasolineras-4057692379.eu-west-1.bonsaisearch.net:443/stations",
+					"protocol": "https",
+					"auth": {
+						"user": "9i8klda28i",
+						"password": "l21fpuw5t4"
+					},
+					"host": [
+						"gasolineras-4057692379",
+						"eu-west-1",
+						"bonsaisearch",
+						"net"
+					],
+					"port": "443",
+					"path": [
+						"stations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Alter map",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"properties\": {\r\n        \"Brand\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"DateData\": {\r\n            \"type\": \"text\"\r\n        },\r\n        \"Direcction\": {\r\n            \"type\": \"text\"\r\n        },\r\n        \"Fuels\": {\r\n            \"type\": \"nested\"\r\n        },\r\n        \"Latitude\": {\r\n            \"type\": \"double\"\r\n        },\r\n        \"Locality\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"Longitude\": {\r\n            \"type\": \"double\"\r\n        },\r\n        \"Margin\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"Municipality\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"PostalCode\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"Province\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"Type\": {\r\n            \"type\": \"keyword\"\r\n        }\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://9i8klda28i:l21fpuw5t4@gasolineras-4057692379.eu-west-1.bonsaisearch.net:443/stations/_mapping",
+					"protocol": "https",
+					"auth": {
+						"user": "9i8klda28i",
+						"password": "l21fpuw5t4"
+					},
+					"host": [
+						"gasolineras-4057692379",
+						"eu-west-1",
+						"bonsaisearch",
+						"net"
+					],
+					"port": "443",
+					"path": [
+						"stations",
+						"_mapping"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
