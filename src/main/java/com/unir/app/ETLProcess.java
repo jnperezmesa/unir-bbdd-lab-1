@@ -13,7 +13,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.*;
-import java.util.Base64;
+import java.sql.Date;
+import java.util.*;
 
 @Slf4j
 public class ETLProcess {
@@ -24,25 +25,34 @@ public class ETLProcess {
     }
 
     public enum Type {
-        marítima, terrestre
+        maritima, terrestre
     }
 
     public enum Fuels {
 
-        gasolina95E5("gasolina 95 e5"), gasolina95E10("gasolina 95 e10"), gasoleoA("gasóleo a"),
-        gasoleoB("gasóleo b"), gasolina95E5Pr("gasolina 95 e5 premium"), gasolina98E5("gasolina 98 e5"),
-        gasolina98E10("gasolina 98 e5"), gasoleoPr("gasóleo premium"), gasoleoC("gasóleo c"),
-        bioetanol("bioetanol"), biodiesel("biodiésel"), GLP("gases licuados del petróleo"),
-        GNCom(" gas natural comprimido"), GNL("gas natural licuado"), hidrogeno("hidrógeno"),
-        gasoleoMar("gasóleo de uso marítimo");
-        private String nombre;
+        Gasolina95E5("gasolina 95 e5"), Gasolina95E10("gasolina 95 e10"), GasoleoA("gasóleo a"),
+        GasoleoB("gasóleo b"), Gasolina95E5Pr("gasolina 95 e5 premium"), Gasolina98E5("gasolina 98 e5"),
+        Gasolina98E10("gasolina 98 e5"), GasoleoPr("gasóleo premium"), GasoleoC("gasóleo c"),
+        Bioetanol("bioetanol"), Biodiesel("biodiésel"), GLP("gases licuados del petróleo"),
+        GNCom("gas natural comprimido"), GNL("gas natural licuado"), Hidrogeno("hidrógeno"),
+        GasoleoMar("gasóleo de uso marítimo");
+        private String name;
 
-        Fuels(String nombre) {
-            nombre = nombre;
+        Fuels(String fuelName) {
+            this.name = fuelName;
         }
 
-        String getNombre() {
-            return nombre;
+        String getFuelName() {
+            return name;
+        }
+
+        public static Fuels retrieveByFuelName(String fuelName) {
+            for (Fuels fuel : Fuels.values()) {
+                if (Objects.equals(fuel.getFuelName(), fuelName)) {
+                    return fuel;
+                }
+            }
+            return null;
         }
     }
 
@@ -50,7 +60,7 @@ public class ETLProcess {
         ALBACETE("albacete"), ALICANTE("alicante"), ALMERIA("almería"), ALAVA("araba/álava"),
         ASTURIAS("asturias"), AVILA("ávila"), BADAJOZ("badajoz"), BALEARES("balears (illes)"),
         BARCELONA("barcelona"), BIZKAIA("bizkaia"), BURGOS("burgos"), CACERES("cáceres"),
-        CADIZ("cádiz"), CANTABRIA("cantabria"), CASTELLON("castellón"), CEUTA("ceuta"),
+        CADIZ("cádiz"), CANTABRIA("cantabria"), CASTELLON("castellón / castelló"), CEUTA("ceuta"),
         REAL("ciudad real"), CORDOBA("córdoba"), CORUNA("coruña (a)"), CUENCA("cuenca"),
         GIPUZKOA("gipuzkoa"), GIRONA("girona"), GRANADA("granada"), GUADALAJARA("guadalajara"),
         HUELVA("huelva"), HUESCA("huesca"), JAEN("jaén"), LEON("león"), LLEIDA("lleida"),
@@ -60,79 +70,191 @@ public class ETLProcess {
         TENERIFE("santa cruz de tenerife"), SEGOVIA("segovia"), SEVILLA("sevilla"), SORIA("soria"),
         TARRAGONA("tarragona"), TERUEL("teruel"), TOLEDO("toledo"), VALENCIA("valencia / valència"),
         VALLADOLID("valladolid"), ZAMORA("zamora"), ZARAGOZA("zaragoza");
-        private String nombre;
 
-        Province(String nombre) {
-            nombre = nombre;
+        private String provinceName;
+
+        Province(String provinceName) {
+            this.provinceName = provinceName;
         }
 
-        String getNombre() {
-            return nombre;
+        String getProvinceName() {
+            return provinceName;
+        }
+
+        public static Province retrieveProvinceByName(String provinceName) {
+            for (Province province : Province.values()) {
+                if (Objects.equals(province.getProvinceName(), provinceName)) {
+                    return province;
+                }
+            }
+            return null;
         }
     }
 
-    //Gson https://www.youtube.com/watch?v=9oq7Y8n1t00
-    public static void main(String[] args) {
-        try (Connection connection = new MySqlConnector("localhost", DATABASE).getConnection()) {
-
-            // funcion que llama a la base de datos
-
-            GasStation[] gasStations = new GasStation[0];
-            Gson gson = new Gson();
-            String jsonRequest = gson.toJson(gasStations);
-
-            String accessKey = System.getenv("BONSAI_ACCESS_KEY");
-            String accessSecret = System.getenv("BONSAI_ACCESS_SECRET");
-            // " + accessKey + ":" + accessSecret + "@
-            String baseUriElastic = "https://gasolineras-4057692379.eu-west-1.bonsaisearch.net:443";
-
-            String bonsaiAuth = Base64.getEncoder().encodeToString((accessKey + ":" + accessSecret).getBytes());
-
-            HttpRequest testRequest = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUriElastic.concat("/stations/_mapping")))
-                    .header("Authorization", "Basic " + bonsaiAuth)
-                    .GET().build();
-            /*
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUriElastic.concat("/stations/_doc")))
-                    .header("Content-Type", "aplication/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
-                    .header("Authorization", "Basic " + bonsaiAuth)
-            */
-
-            HttpClient client = HttpClient.newBuilder().build();
-
-            HttpResponse<String> response = client.send(testRequest, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.body());
-
-        } catch (Exception e) {
-            log.error("Error al tratar con la base de datos", e);
-        }
-
-    }
 
     @AllArgsConstructor
     @Getter
-    private class GasStation {
+    public static class GasStation {
         Type type;
         Margin margin;
-        Province province;
+        String province;
         String municipality;
         String locality;
         String postalCode;
         String direction;
         double latitude;
         double longitude;
-        Fuel[] fuels;
+        Map<Fuels, Double> fuels;
         String brand;
         String schedule;
+        Date dateData;
     }
 
-    @AllArgsConstructor
-    @Getter
-    private class Fuel {
-        Fuels type;
-        Double price;
-        Date dateData;
+    //Gson https://www.youtube.com/watch?v=9oq7Y8n1t00
+    public static void main(String[] args) {
+        try (Connection connection = new MySqlConnector("localhost", DATABASE).getConnection()) {
+            GasStation[] gasStations = getAllStations(connection);
+
+            Gson gson = new Gson();
+            String jsonRequest = gson.toJson(gasStations);
+
+            jsonRequest = jsonRequest.substring(1, jsonRequest.length() - 1).replace("},{", "}\n{\"index\":{\"_index\":\"stations\"}}\n{");
+            System.out.println(jsonRequest);
+            /*
+                Enseñar el ejemplo a Javier
+
+                Eliminar primer yu ultimo caracter del json que es '[' y ']'
+
+                '},{' pasar a '
+                }
+                {"index":{"_index":"stations"}}
+                {'
+            */
+
+            /*
+            String accessKey = System.getenv("BONSAI_ACCESS_KEY");
+            String accessSecret = System.getenv("BONSAI_ACCESS_SECRET");
+            String baseUriElastic = "https://gasolineras-4057692379.eu-west-1.bonsaisearch.net:443";
+
+            String bonsaiAuth = Base64.getEncoder().encodeToString((accessKey + ":" + accessSecret).getBytes());
+
+            /*
+            HttpRequest testRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUriElastic.concat("/stations/_mapping")))
+                    .header("Authorization", "Basic " + bonsaiAuth)
+                    .GET().build();
+
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUriElastic.concat("/stations/_doc")))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Basic " + bonsaiAuth)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
+
+
+
+            HttpClient client = HttpClient.newBuilder().build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+            */
+
+        } catch (Exception e) {
+            log.error("Error al tratar con la base de datos", e);
+        }
+    }
+
+    /**
+     * función que elimina los espacios en blanco de la cadena
+     */
+
+    private static Map<Fuels, Double> getFuels(Connection connection, int fuelStationId) throws SQLException {
+        String query = "SELECT\n" +
+                "    fuel_type.name AS 'fuel_type',\n" +
+                "    price.price AS 'price',\n" +
+                "    price.create_at AS 'create_at'\n" +
+                "FROM\n" +
+                "    price\n" +
+                "JOIN\n" +
+                "    fuel_type ON price.fuel_type_id = fuel_type.id\n" +
+                "WHERE\n" +
+                "    price.fuel_station_id = ?";
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setInt(1, fuelStationId);
+        ResultSet resultSet = statement.executeQuery();
+
+        Map<Fuels, Double> fuels = new HashMap<Fuels, Double>();
+
+        while (resultSet.next()) {
+            fuels.put(Fuels.retrieveByFuelName(resultSet.getString("fuel_type")), resultSet.getDouble("price"));
+        }
+        return fuels;
+    }
+
+    /**
+     * @param connection - Connection to the database
+     * @throws SQLException
+     */
+    private static GasStation[] getAllStations(Connection connection) throws SQLException {
+        String query = "SELECT\n" +
+                "    fuel_station.id AS 'id',\n" +
+                "    fuel_station.is_maritime AS 'is_maritime',\n" +
+                "    fuel_station.margin AS 'margin',\n" +
+                "    province.name AS 'province',\n" +
+                "    municipality.name AS 'municipality',\n" +
+                "    town.name AS 'locality',\n" +
+                "    postal_code.code AS 'postalCode',\n" +
+                "    fuel_station.address AS 'direction',\n" +
+                "    fuel_station.latitude AS 'latitude',\n" +
+                "    fuel_station.longitude AS 'longitude',\n" +
+                "    company.name AS 'company',\n" +
+                "    (SELECT MIN(p.create_at)\n" +
+                "     FROM price p\n" +
+                "     WHERE p.fuel_station_id = fuel_station.id) AS 'registration_date'\n" +
+                "FROM\n" +
+                "    fuel_station\n" +
+                "JOIN\n" +
+                "    province ON fuel_station.province_id = province.id\n" +
+                "JOIN\n" +
+                "    municipality ON fuel_station.municipality_id = municipality.id\n" +
+                "JOIN\n" +
+                "    town ON fuel_station.town_id = town.id\n" +
+                "JOIN\n" +
+                "    postal_code ON fuel_station.postal_code_id = postal_code.id\n" +
+                "JOIN\n" +
+                "    company ON fuel_station.company_id = company.id";
+        PreparedStatement statement = connection.prepareStatement(query);
+        ResultSet resultSet = statement.executeQuery();
+
+        ArrayList<GasStation> gasStations = new ArrayList<>();
+
+        while (resultSet.next()) {
+            int gasStationId = resultSet.getInt("id");
+            Map<Fuels, Double> fuels = getFuels(connection, gasStationId);
+
+            boolean isMaritime = resultSet.getBoolean("is_maritime");
+            Type type = isMaritime ? Type.maritima : Type.terrestre;
+
+            Margin margin = Margin.valueOf(resultSet.getString("margin"));
+            Province province = Province.retrieveProvinceByName(resultSet.getString("province"));
+
+            GasStation gasStation = new GasStation(
+                    type,
+                    margin,
+                    province.getProvinceName(),
+                    resultSet.getString("municipality"),
+                    resultSet.getString("locality"),
+                    resultSet.getString("postalCode"),
+                    resultSet.getString("direction"),
+                    resultSet.getDouble("latitude"),
+                    resultSet.getDouble("longitude"),
+                    fuels,
+                    resultSet.getString("company"),
+                    resultSet.getString("registration_date"),
+                    resultSet.getDate("registration_date")
+            );
+            gasStations.add(gasStation);
+        }
+        return gasStations.toArray(new GasStation[gasStations.size()]);
     }
 }
