@@ -39,7 +39,7 @@ ORDER BY p.price ASC
 LIMIT 1;
 
 -- Provincia en la que se encuentre la estación de servicio marítima con el combustible “Gasolina 95 E5” más caro.
-EXPLAIN ANALYZE SELECT prov.name
+EXPLAIN ANALYZE SELECT prov.name, p.price
 FROM price AS p
 JOIN fuel_type AS ft ON p.fuel_type_id = ft.id
 JOIN fuel_station AS fs ON p.fuel_station_id = fs.id

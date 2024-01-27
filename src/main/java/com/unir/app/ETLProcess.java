@@ -94,19 +94,25 @@ public class ETLProcess {
 
     @AllArgsConstructor
     @Getter
+    public static class Location {
+        double lat;
+        double lon;
+    }
+
+
+    @AllArgsConstructor
+    @Getter
     public static class GasStation {
-        Type type;
+        Type stationType;
         Margin margin;
         String province;
         String municipality;
         String locality;
         String postalCode;
         String direction;
-        double latitude;
-        double longitude;
+        Location location;
         Map<Fuels, Double> fuels;
         String brand;
-        String schedule;
         Date dateData;
     }
 
@@ -229,6 +235,7 @@ public class ETLProcess {
 
             Margin margin = Margin.valueOf(resultSet.getString("margin"));
             Province province = Province.retrieveProvinceByName(resultSet.getString("province"));
+            Location location = new Location(resultSet.getDouble("latitude"), resultSet.getDouble("longitude"));
 
             GasStation gasStation = new GasStation(
                     type,
@@ -238,8 +245,7 @@ public class ETLProcess {
                     resultSet.getString("locality"),
                     resultSet.getString("postalCode"),
                     resultSet.getString("direction"),
-                    resultSet.getDouble("latitude"),
-                    resultSet.getDouble("longitude"),
+                    location,
                     fuels,
                     resultSet.getString("company"),
                     resultSet.getDate("registration_date")
