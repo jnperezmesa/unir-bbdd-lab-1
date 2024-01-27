@@ -60,7 +60,7 @@ public class ETLProcess {
         ALBACETE("albacete"), ALICANTE("alicante"), ALMERIA("almería"), ALAVA("araba/álava"),
         ASTURIAS("asturias"), AVILA("ávila"), BADAJOZ("badajoz"), BALEARES("balears (illes)"),
         BARCELONA("barcelona"), BIZKAIA("bizkaia"), BURGOS("burgos"), CACERES("cáceres"),
-        CADIZ("cádiz"), CANTABRIA("cantabria"), CASTELLON("castellón"), CEUTA("ceuta"),
+        CADIZ("cádiz"), CANTABRIA("cantabria"), CASTELLON("castellón / castelló"), CEUTA("ceuta"),
         REAL("ciudad real"), CORDOBA("córdoba"), CORUNA("coruña (a)"), CUENCA("cuenca"),
         GIPUZKOA("gipuzkoa"), GIRONA("girona"), GRANADA("granada"), GUADALAJARA("guadalajara"),
         HUELVA("huelva"), HUESCA("huesca"), JAEN("jaén"), LEON("león"), LLEIDA("lleida"),
@@ -71,14 +71,14 @@ public class ETLProcess {
         TARRAGONA("tarragona"), TERUEL("teruel"), TOLEDO("toledo"), VALENCIA("valencia / valència"),
         VALLADOLID("valladolid"), ZAMORA("zamora"), ZARAGOZA("zaragoza");
 
-        private String name;
+        private String provinceName;
 
         Province(String provinceName) {
-            this.name = provinceName;
+            this.provinceName = provinceName;
         }
 
         String getProvinceName() {
-            return name;
+            return provinceName;
         }
 
         public static Province retrieveProvinceByName(String provinceName) {
@@ -97,7 +97,7 @@ public class ETLProcess {
     public static class GasStation {
         Type type;
         Margin margin;
-        Province province;
+        String province;
         String municipality;
         String locality;
         String postalCode;
@@ -117,13 +117,15 @@ public class ETLProcess {
 
             Gson gson = new Gson();
             String jsonRequest = gson.toJson(gasStations);
+
+            jsonRequest = jsonRequest.substring(1, jsonRequest.length() - 1).replace("},{", "}\n{\"index\":{\"_index\":\"stations\"}}\n{");
             System.out.println(jsonRequest);
             /*
                 Enseñar el ejemplo a Javier
 
                 Eliminar primer yu ultimo caracter del json que es '[' y ']'
 
-                '}*{' pasar a '
+                '},{' pasar a '
                 }
                 {"index":{"_index":"stations"}}
                 {'
@@ -190,38 +192,37 @@ public class ETLProcess {
     }
 
     /**
-     *
      * @param connection - Connection to the database
      * @throws SQLException
      */
     private static GasStation[] getAllStations(Connection connection) throws SQLException {
         String query = "SELECT\n" +
-            "    fuel_station.id AS 'id',\n" +
-            "    fuel_station.is_maritime AS 'is_maritime',\n" +
-            "    fuel_station.margin AS 'margin',\n" +
-            "    province.name AS 'province',\n" +
-            "    municipality.name AS 'municipality',\n" +
-            "    town.name AS 'locality',\n" +
-            "    postal_code.code AS 'postalCode',\n" +
-            "    fuel_station.address AS 'direction',\n" +
-            "    fuel_station.latitude AS 'latitude',\n" +
-            "    fuel_station.longitude AS 'longitude',\n" +
-            "    company.name AS 'company',\n" +
-            "    (SELECT MIN(p.create_at)\n" +
-            "     FROM price p\n" +
-            "     WHERE p.fuel_station_id = fuel_station.id) AS 'registration_date'\n" +
-            "FROM\n" +
-            "    fuel_station\n" +
-            "JOIN\n" +
-            "    province ON fuel_station.province_id = province.id\n" +
-            "JOIN\n" +
-            "    municipality ON fuel_station.municipality_id = municipality.id\n" +
-            "JOIN\n" +
-            "    town ON fuel_station.town_id = town.id\n" +
-            "JOIN\n" +
-            "    postal_code ON fuel_station.postal_code_id = postal_code.id\n" +
-            "JOIN\n" +
-            "    company ON fuel_station.company_id = company.id";
+                "    fuel_station.id AS 'id',\n" +
+                "    fuel_station.is_maritime AS 'is_maritime',\n" +
+                "    fuel_station.margin AS 'margin',\n" +
+                "    province.name AS 'province',\n" +
+                "    municipality.name AS 'municipality',\n" +
+                "    town.name AS 'locality',\n" +
+                "    postal_code.code AS 'postalCode',\n" +
+                "    fuel_station.address AS 'direction',\n" +
+                "    fuel_station.latitude AS 'latitude',\n" +
+                "    fuel_station.longitude AS 'longitude',\n" +
+                "    company.name AS 'company',\n" +
+                "    (SELECT MIN(p.create_at)\n" +
+                "     FROM price p\n" +
+                "     WHERE p.fuel_station_id = fuel_station.id) AS 'registration_date'\n" +
+                "FROM\n" +
+                "    fuel_station\n" +
+                "JOIN\n" +
+                "    province ON fuel_station.province_id = province.id\n" +
+                "JOIN\n" +
+                "    municipality ON fuel_station.municipality_id = municipality.id\n" +
+                "JOIN\n" +
+                "    town ON fuel_station.town_id = town.id\n" +
+                "JOIN\n" +
+                "    postal_code ON fuel_station.postal_code_id = postal_code.id\n" +
+                "JOIN\n" +
+                "    company ON fuel_station.company_id = company.id";
         PreparedStatement statement = connection.prepareStatement(query);
         ResultSet resultSet = statement.executeQuery();
 
@@ -240,7 +241,7 @@ public class ETLProcess {
             GasStation gasStation = new GasStation(
                     type,
                     margin,
-                    province,
+                    province.getProvinceName(),
                     resultSet.getString("municipality"),
                     resultSet.getString("locality"),
                     resultSet.getString("postalCode"),
