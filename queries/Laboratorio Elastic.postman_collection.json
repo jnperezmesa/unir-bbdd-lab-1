@@ -1,0 +1,353 @@
+{
+	"info": {
+		"_postman_id": "0eeab5c9-3476-43c4-bc55-58ddb244841e",
+		"name": "Laboratorio Elastic",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31333090"
+	},
+	"item": [
+		{
+			"name": "PreviousQueries",
+			"item": [
+				{
+					"name": "Query3(gasolina95E5Madrid)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"size\": 1,\r\n    \"query\": {\r\n        \"bool\": {\r\n            \"filter\": [\r\n                {\r\n                    \"term\": {\r\n                        \"province\": \"madrid\"\r\n                    }\r\n                }\r\n            ]\r\n        }\r\n    },\r\n    \"sort\": [\r\n        {\r\n            \"fuels.Gasolina95E5\": {\r\n                \"order\": \"asc\"\r\n            }\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{elascticUrl}}/stations/_search",
+							"host": [
+								"{{elascticUrl}}"
+							],
+							"path": [
+								"stations",
+								"_search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query1(+terrestres)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"size\": 0, \r\n    \"query\": {\r\n        \"match\": {\r\n            \"stationType\": \"terrestre\"\r\n        }\r\n    },\r\n    \"aggs\": {\r\n        \"most_common_brand\": {\r\n            \"terms\": {\r\n                \"field\": \"brand\",\r\n                \"size\": 1 \r\n            }\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{elascticUrl}}/stations/_search",
+							"host": [
+								"{{elascticUrl}}"
+							],
+							"path": [
+								"stations",
+								"_search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query2(+maritimas)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"size\": 0,\r\n    \"query\": {\r\n        \"match\": {\r\n            \"stationType\": \"maritima\"\r\n        }\r\n    },\r\n    \"aggs\": {\r\n        \"top_brand\": {\r\n            \"terms\": {\r\n                \"field\": \"brand\",\r\n                \"size\": 1\r\n            }\r\n        }\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{elascticUrl}}/stations/_search",
+							"host": [
+								"{{elascticUrl}}"
+							],
+							"path": [
+								"stations",
+								"_search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query4(Location)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"size\":50,\r\n    \"query\": {\r\n        \"bool\": {\r\n            \"filter\": [\r\n                {\r\n                    \"geo_distance\": {\r\n                        \"distance\": \"10km\",\r\n                        \"location\": { \r\n                            \"lat\": 38.994349, \r\n                            \"lon\": -1.856436\r\n                        }\r\n                    }\r\n                }\r\n            ]\r\n        }\r\n    },\r\n    \"sort\": [\r\n        {\r\n            \"fuels.GasoleoA\": {\r\n                \"order\": \"asc\"\r\n            }\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{elascticUrl}}/stations/_search",
+							"host": [
+								"{{elascticUrl}}"
+							],
+							"path": [
+								"stations",
+								"_search"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query5(Gasolina95E5Mar)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"size\": 1,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"term\": {\r\n            \"stationType.keyword\": \"marítima\"\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"fuels.Gasolina95E5\": {\r\n              \"gt\": 0\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"sort\": [\r\n    {\r\n      \"fuels.Gasolina95E5\": {\r\n        \"order\": \"desc\"\r\n      }\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{elascticUrl}}/stations/_search",
+							"host": [
+								"{{elascticUrl}}"
+							],
+							"path": [
+								"stations",
+								"_search"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Map index",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{elascticUrl}}/stations/_mapping",
+					"host": [
+						"{{elascticUrl}}"
+					],
+					"path": [
+						"stations",
+						"_mapping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create index",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{elascticUrl}}/stations",
+					"host": [
+						"{{elascticUrl}}"
+					],
+					"path": [
+						"stations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Alter map",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"properties\": {\r\n        \"brand\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"dateData\": {\r\n            \"type\": \"text\"\r\n        },\r\n        \"direction\": {\r\n            \"type\": \"text\"\r\n        },\r\n        \"fuels\": {\r\n            \"type\": \"nested\"\r\n        },\r\n        \"location\": {\r\n            \"type\": \"geo_point\"\r\n        },\r\n        \"locality\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"margin\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"municipality\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"postalCode\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"province\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"stationType\": {\r\n            \"type\": \"keyword\"\r\n        }\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{elascticUrl}}/stations/_mapping",
+					"host": [
+						"{{elascticUrl}}"
+					],
+					"path": [
+						"stations",
+						"_mapping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{elascticUrl}}/stations/_search",
+					"host": [
+						"{{elascticUrl}}"
+					],
+					"path": [
+						"stations",
+						"_search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search Zaragoza",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"query\": {\r\n        \"match\": {\r\n            \"province\": \"zaragoza\"\r\n        }\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{elascticUrl}}/stations/_search",
+					"host": [
+						"{{elascticUrl}}"
+					],
+					"path": [
+						"stations",
+						"_search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search CP",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"query\": {\r\n        \"match\": {\r\n            \"postalCode\": \"24007\"\r\n        }\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{elascticUrl}}/stations/_search",
+					"host": [
+						"{{elascticUrl}}"
+					],
+					"path": [
+						"stations",
+						"_search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteIndex",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{elasticUrl}}/stations",
+					"host": [
+						"{{elasticUrl}}"
+					],
+					"path": [
+						"stations"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "elasticUrl",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "elascticUrl",
+			"value": "https://9i8klda28i:l21fpuw5t4@gasolineras-4057692379.eu-west-1.bonsaisearch.net:443"
+		}
+	]
+}
