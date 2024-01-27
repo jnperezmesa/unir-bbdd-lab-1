@@ -119,34 +119,26 @@ public class ETLProcess {
             String jsonRequest = gson.toJson(gasStations);
 
             jsonRequest = jsonRequest.substring(1, jsonRequest.length() - 1).replace("},{", "}\n{\"index\":{\"_index\":\"stations\"}}\n{");
+            jsonRequest = "{\"index\":{\"_index\":\"stations\"}}\n" + jsonRequest + "\n";
             System.out.println(jsonRequest);
-            /*
-                Enseñar el ejemplo a Javier
 
-                Eliminar primer yu ultimo caracter del json que es '[' y ']'
 
-                '},{' pasar a '
-                }
-                {"index":{"_index":"stations"}}
-                {'
-            */
-
-            /*
             String accessKey = System.getenv("BONSAI_ACCESS_KEY");
             String accessSecret = System.getenv("BONSAI_ACCESS_SECRET");
             String baseUriElastic = "https://gasolineras-4057692379.eu-west-1.bonsaisearch.net:443";
 
             String bonsaiAuth = Base64.getEncoder().encodeToString((accessKey + ":" + accessSecret).getBytes());
 
-            /*
+ /*
             HttpRequest testRequest = HttpRequest.newBuilder()
                     .uri(URI.create(baseUriElastic.concat("/stations/_mapping")))
                     .header("Authorization", "Basic " + bonsaiAuth)
                     .GET().build();
 
 
+*/
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(baseUriElastic.concat("/stations/_doc")))
+                    .uri(URI.create(baseUriElastic.concat("/stations/_bulk")))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Basic " + bonsaiAuth)
                     .POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
@@ -157,7 +149,7 @@ public class ETLProcess {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println(response.body());
-            */
+
 
         } catch (Exception e) {
             log.error("Error al tratar con la base de datos", e);
@@ -250,7 +242,6 @@ public class ETLProcess {
                     resultSet.getDouble("longitude"),
                     fuels,
                     resultSet.getString("company"),
-                    resultSet.getString("registration_date"),
                     resultSet.getDate("registration_date")
             );
             gasStations.add(gasStation);
