@@ -139,7 +139,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"size\": 1,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"term\": {\r\n            \"stationType.keyword\": \"marítima\"\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"fuels.Gasolina95E5\": {\r\n              \"gt\": 0\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"sort\": [\r\n    {\r\n      \"fuels.Gasolina95E5\": {\r\n        \"order\": \"desc\"\r\n      }\r\n    }\r\n  ]\r\n}",
+							"raw": "{\r\n  \"size\": 1,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"term\": {\r\n            \"stationType.keyword\": \"maritima\"\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"fuels.Gasolina95E5\": {\r\n              \"gt\": 0\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"sort\": [\r\n    {\r\n      \"fuels.Gasolina95E5\": {\r\n        \"order\": \"desc\"\r\n      }\r\n    }\r\n  ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
