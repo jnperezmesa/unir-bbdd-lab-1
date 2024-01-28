@@ -19,7 +19,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"size\": 1,\r\n    \"query\": {\r\n        \"bool\": {\r\n            \"filter\": [\r\n                {\r\n                    \"term\": {\r\n                        \"province\": \"madrid\"\r\n                    }\r\n                }\r\n            ]\r\n        }\r\n    },\r\n    \"sort\": [\r\n        {\r\n            \"fuels.Gasolina95E5\": {\r\n                \"order\": \"asc\"\r\n            }\r\n        }\r\n    ]\r\n}",
+							"raw": "{\r\n    \"size\": 1,\r\n    \"query\": {\r\n        \"match\": {\r\n            \"province\": \"madrid\"\r\n        }\r\n    },\r\n    \"sort\": [\r\n        {\r\n            \"fuels.Gasolina95E5\": {\r\n                \"order\": \"asc\"\r\n            }\r\n        }\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -203,7 +203,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"properties\": {\r\n        \"brand\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"dateData\": {\r\n            \"type\": \"text\"\r\n        },\r\n        \"direction\": {\r\n            \"type\": \"text\"\r\n        },\r\n        \"fuels\": {\r\n            \"type\": \"nested\"\r\n        },\r\n        \"location\": {\r\n            \"type\": \"geo_point\"\r\n        },\r\n        \"locality\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"margin\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"municipality\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"postalCode\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"province\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"stationType\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"openingHours\": {\r\n            \"type\": \"keyword\"\r\n        }\r\n    }\r\n}",
+					"raw": "{\r\n    \"properties\": {\r\n        \"brand\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"dateData\": {\r\n            \"type\": \"date\",\r\n            \"format\": \"yyyy/MM/dd\"\r\n        },\r\n        \"direction\": {\r\n            \"type\": \"text\"\r\n        },\r\n        \"fuels\": {\r\n            \"type\": \"nested\"\r\n        },\r\n        \"location\": {\r\n            \"type\": \"geo_point\"\r\n        },\r\n        \"locality\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"margin\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"municipality\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"postalCode\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"province\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"stationType\": {\r\n            \"type\": \"keyword\"\r\n        },\r\n        \"openingHours\": {\r\n            \"type\": \"keyword\"\r\n        }\r\n    }\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
