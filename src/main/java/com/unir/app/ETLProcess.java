@@ -114,9 +114,9 @@ public class ETLProcess {
         Map<Fuels, Double> fuels;
         String brand;
         Date dateData;
+        String openingHours;
     }
 
-    //Gson https://www.youtube.com/watch?v=9oq7Y8n1t00
     public static void main(String[] args) {
         try (Connection connection = new MySqlConnector("localhost", DATABASE).getConnection()) {
             GasStation[] gasStations = getAllStations(connection);
@@ -126,33 +126,26 @@ public class ETLProcess {
 
             jsonRequest = jsonRequest.substring(1, jsonRequest.length() - 1).replace("},{", "}\n{\"index\":{\"_index\":\"stations\"}}\n{");
             jsonRequest = "{\"index\":{\"_index\":\"stations\"}}\n" + jsonRequest + "\n";
-            System.out.println(jsonRequest);
-
 
             String accessKey = System.getenv("BONSAI_ACCESS_KEY");
             String accessSecret = System.getenv("BONSAI_ACCESS_SECRET");
             String baseUriElastic = "https://gasolineras-4057692379.eu-west-1.bonsaisearch.net:443";
-
             String bonsaiAuth = Base64.getEncoder().encodeToString((accessKey + ":" + accessSecret).getBytes());
 
- /*
+            /*
             HttpRequest testRequest = HttpRequest.newBuilder()
                     .uri(URI.create(baseUriElastic.concat("/stations/_mapping")))
                     .header("Authorization", "Basic " + bonsaiAuth)
                     .GET().build();
+            */
 
-
-*/
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(baseUriElastic.concat("/stations/_bulk")))
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Basic " + bonsaiAuth)
                     .POST(HttpRequest.BodyPublishers.ofString(jsonRequest)).build();
 
-
-
             HttpClient client = HttpClient.newBuilder().build();
-
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             System.out.println(response.body());
 
@@ -206,6 +199,7 @@ public class ETLProcess {
                 "    fuel_station.latitude AS 'latitude',\n" +
                 "    fuel_station.longitude AS 'longitude',\n" +
                 "    company.name AS 'company',\n" +
+                "    fuel_station.opening_hours AS 'opening_hours',\n" +
                 "    (SELECT MIN(p.create_at)\n" +
                 "     FROM price p\n" +
                 "     WHERE p.fuel_station_id = fuel_station.id) AS 'registration_date'\n" +
@@ -248,7 +242,8 @@ public class ETLProcess {
                     location,
                     fuels,
                     resultSet.getString("company"),
-                    resultSet.getDate("registration_date")
+                    resultSet.getDate("registration_date"),
+                    resultSet.getString("opening_hours")
             );
             gasStations.add(gasStation);
         }
