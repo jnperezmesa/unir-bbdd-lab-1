@@ -7,13 +7,12 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.*;
-import java.sql.Date;
+import java.text.ParseException;
 import java.util.*;
 
 @Slf4j
@@ -113,7 +112,7 @@ public class ETLProcess {
         Location location;
         Map<Fuels, Double> fuels;
         String brand;
-        Date dateData;
+        String dateData;
         String openingHours;
     }
 
@@ -186,7 +185,7 @@ public class ETLProcess {
      * @param connection - Connection to the database
      * @throws SQLException
      */
-    private static GasStation[] getAllStations(Connection connection) throws SQLException {
+    private static GasStation[] getAllStations(Connection connection) throws SQLException, ParseException {
         String query = "SELECT\n" +
                 "    fuel_station.id AS 'id',\n" +
                 "    fuel_station.is_maritime AS 'is_maritime',\n" +
@@ -200,7 +199,7 @@ public class ETLProcess {
                 "    fuel_station.longitude AS 'longitude',\n" +
                 "    company.name AS 'company',\n" +
                 "    fuel_station.opening_hours AS 'opening_hours',\n" +
-                "    (SELECT MIN(p.create_at)\n" +
+                "    (SELECT DATE_FORMAT(MIN(p.create_at), '%Y/%m/%d')\n" +
                 "     FROM price p\n" +
                 "     WHERE p.fuel_station_id = fuel_station.id) AS 'registration_date'\n" +
                 "FROM\n" +
@@ -242,7 +241,7 @@ public class ETLProcess {
                     location,
                     fuels,
                     resultSet.getString("company"),
-                    resultSet.getDate("registration_date"),
+                    resultSet.getString("registration_date"),
                     resultSet.getString("opening_hours")
             );
             gasStations.add(gasStation);
